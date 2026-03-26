@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body {
+      background-color: #020617;
+      background-image: radial-gradient(circle at 2px 2px, #1e293b 1px, transparent 0);
+      background-size: 40px 40px;
+      color: #f8fafc;
+    }
+    .neon-border { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 5px rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); }
+    .glow-text { text-shadow: 0 0 10px rgba(59, 130, 246, 0.8); }
+    .scanner-line { height: 2px; background: linear-gradient(90deg, transparent, #3b82f6, transparent); animation: scan 3s linear infinite; }
+    @keyframes scan { 0% { transform: translateY(-10px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(280px); opacity: 0; } }
+
+    /* Custom Sci-Fi Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 font-mono relative">
+
+  <div class="mb-12 text-center">
+    <div class="text-[10px] tracking-[0.3em] text-blue-400 font-bold mb-2 uppercase opacity-80">Kampung Inggris Pontianak</div>
+    <h1 class="text-4xl md:text-6xl font-black tracking-tighter glow-text uppercase italic">Identity Required</h1>
+    <div id="secret-trigger" class="w-24 h-1 bg-blue-600 mx-auto mt-4 rounded-full shadow-[0_0_15px_#2563eb] cursor-pointer hover:bg-blue-400 transition-colors"></div>
+  </div>
+
+  <div class="w-full max-w-md relative">
+    <div class="absolute inset-0 bg-blue-600/5 blur-3xl rounded-full"></div>
+    <div class="relative bg-slate-900/80 backdrop-blur-xl p-8 rounded-xl neon-border overflow-hidden">
+      <div class="absolute inset-0 scanner-line pointer-events-none opacity-20"></div>
+
+      <div class="flex justify-between items-start mb-8">
+        <div><p class="text-[10px] text-blue-400 uppercase tracking-widest font-bold">Trainer-Code / Access Key</p></div>
+        <div class="text-[10px] text-slate-500 font-mono">ATP</div>
+      </div>
+
+      <div class="space-y-8">
+        <div class="relative group">
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 opacity-50"><i class="fa-solid fa-microchip"></i></div>
+          <input type="text" id="trainer-code" class="w-full bg-slate-950/50 border border-slate-700 rounded-lg py-5 pl-12 pr-4 text-xl tracking-[0.2em] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all uppercase placeholder:text-slate-800" placeholder="[ _ _ _ - _ _ _ ]">
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label class="flex items-center cursor-pointer group">
+            <div class="relative">
+              <input type="checkbox" id="remember-me" class="sr-only">
+              <div class="block bg-slate-800 w-10 h-5 rounded-full border border-slate-600 group-hover:border-blue-500 transition"></div>
+              <div class="dot absolute left-1 top-1 bg-slate-400 w-3 h-3 rounded-full transition-all"></div>
+            </div>
+            <div class="ml-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-blue-400 transition">Maintain Linkage</div>
+          </label>
+        </div>
+
+        <button onclick="handleCheckIn()" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-lg shadow-[0_0_20px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3 uppercase tracking-tighter transition-all active:scale-[0.98]">
+          <span class="text-lg">Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>
+        </button>
+      </div>
+
+      <div class="mt-8 flex justify-between items-end border-t border-slate-800 pt-4">
+        <div class="text-[8px] text-slate-500 leading-tight uppercase font-bold">Created By Jimmy<br>Stay Healthy Everyone</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 w-full max-w-4xl">
+    <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-lg">
+      <div class="text-[8px] text-slate-500 uppercase mb-1">Active Users</div><div class="text-xl font-bold text-slate-200 tracking-tighter">142</div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-lg">
+      <div class="text-[8px] text-slate-500 uppercase mb-1">By the end of 2025</div><div class="text-xl font-bold text-slate-200 tracking-tighter">1500+ Students</div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-lg">
+      <div class="text-[8px] text-slate-500 uppercase mb-1">Philosophy</div><div class="text-xl font-bold text-emerald-500 tracking-tighter uppercase italic">Learning Before Teaching</div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-lg">
+      <div class="text-[8px] text-slate-500 uppercase mb-1">2</div><div class="text-xl font-bold text-emerald-500 tracking-tighter">Reviewing After Teaching</div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed top-10 right-10 p-4 rounded-lg border border-white/10 backdrop-blur-md translate-x-[200%] transition-all duration-500 z-50"></div>
+
+  <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[100] p-4">
+    <div class="bg-slate-900 border border-blue-500/30 p-8 rounded-2xl w-full max-w-sm neon-border">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="h-1 w-8 bg-blue-500"></div>
+        <h2 class="text-xl font-bold text-blue-400 uppercase tracking-tighter italic">Management Override</h2>
+      </div>
+      <div class="space-y-4">
+        <input type="text" id="admin-user" placeholder="USERNAME" 
+               class="w-full bg-slate-950 border border-slate-800 p-4 rounded-lg text-sm outline-none focus:border-blue-500 text-blue-100 placeholder:text-slate-700">
+        
+        <div class="relative">
+          <input type="password" id="admin-pass" placeholder="PASSWORD" 
+                 class="w-full bg-slate-950 border border-slate-800 p-4 pr-12 rounded-lg text-sm outline-none focus:border-blue-500 text-blue-100 placeholder:text-slate-700">
+          <button onclick="toggleAdminPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-400 transition-colors focus:outline-none">
+            <i id="admin-pass-icon" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between py-2">
+          <label class="flex items-center cursor-pointer group">
+            <div class="relative">
+              <input type="checkbox" id="admin-remember" class="sr-only">
+              <div class="block bg-slate-800 w-10 h-5 rounded-full border border-slate-600 group-hover:border-blue-500 transition"></div>
+              <div class="admin-dot absolute left-1 top-1 bg-slate-400 w-3 h-3 rounded-full transition-all"></div>
+            </div>
+            <div class="ml-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-blue-400 transition">Maintain Linkage</div>
+          </label>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-4 rounded-lg font-bold text-xs uppercase hover:bg-slate-700 transition">Abort</button>
+          <button onclick="attemptAdminLogin()" id="admin-login-btn" class="flex-1 bg-blue-600 text-white py-4 rounded-lg font-bold text-xs uppercase hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition">Execute</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="add-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[120] p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-emerald-500/30 p-8 rounded-2xl w-full max-w-lg shadow-[0_0_15px_rgba(16,185,129,0.3)] my-auto mt-10">
+      <h2 class="text-xl font-bold text-emerald-400 mb-6 uppercase tracking-tighter italic">Deploy Personnel</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="new-name" placeholder="Trainer Name" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500">
+        <input type="text" id="new-code" placeholder="Trainer Code (e.g. TRN-001)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500 uppercase">
+        <input type="email" id="new-email" placeholder="Email Address" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500 md:col-span-2">
+        <input type="text" id="new-wa" placeholder="WA Number" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500">
+        <input type="text" id="new-branch" placeholder="Branch (Cabang)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500">
+        <input type="text" id="new-address" placeholder="Address" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500 md:col-span-2">
+        
+        <select id="new-level" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500">
+          <option value="" disabled selected>Teaching Level</option>
+          <option value="Basic">Basic</option><option value="Pre-Intermediate">Pre-Intermediate</option>
+          <option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option>
+        </select>
+        <select id="new-pref" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500">
+          <option value="" disabled selected>Preferred Class</option>
+          <option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA/UMUM">SMA/UMUM</option>
+        </select>
+        <select id="new-status" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-emerald-100 outline-none focus:border-emerald-500 md:col-span-2">
+          <option value="" disabled selected>Working Status</option>
+          <option value="Main Trainer">Main Trainer</option>
+          <option value="Substitute Trainer">Substitute Trainer</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+      <div class="flex gap-2 pt-6">
+        <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded font-bold text-xs uppercase hover:bg-slate-700">Cancel</button>
+        <button onclick="executeAddAccount()" id="add-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded font-bold text-xs uppercase hover:bg-emerald-500">Deploy</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="edit-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[120] p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-amber-500/30 p-8 rounded-2xl w-full max-w-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] my-auto mt-10">
+      <h2 class="text-xl font-bold text-amber-400 mb-6 uppercase tracking-tighter italic">Edit Personnel</h2>
+      <input type="hidden" id="edit-original-code">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="edit-name" placeholder="Trainer Name" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500">
+        <input type="text" id="edit-code" placeholder="Trainer Code" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500 uppercase">
+        <input type="email" id="edit-email" placeholder="Email Address" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500 md:col-span-2">
+        <input type="text" id="edit-wa" placeholder="WA Number" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500">
+        <input type="text" id="edit-branch" placeholder="Branch (Cabang)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500">
+        <input type="text" id="edit-address" placeholder="Address" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500 md:col-span-2">
+        
+        <select id="edit-level" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500">
+          <option value="Basic">Basic</option><option value="Pre-Intermediate">Pre-Intermediate</option>
+          <option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option>
+        </select>
+        <select id="edit-pref" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500">
+          <option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA/UMUM">SMA/UMUM</option>
+        </select>
+        <select id="edit-status" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-amber-100 outline-none focus:border-amber-500 md:col-span-2">
+          <option value="Main Trainer">Main Trainer</option>
+          <option value="Substitute Trainer">Substitute Trainer</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+      <div class="flex gap-2 pt-6">
+        <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded font-bold text-xs uppercase hover:bg-slate-700">Cancel</button>
+        <button onclick="executeUpdateAccount()" id="edit-btn" class="flex-1 bg-amber-600 text-white py-3 rounded font-bold text-xs uppercase hover:bg-amber-500">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="success-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center z-[150] p-4 transition-all duration-300">
+    <div class="bg-slate-900 border border-emerald-500/50 p-10 rounded-2xl w-full max-w-md shadow-[0_0_40px_rgba(16,185,129,0.3)] text-center relative overflow-hidden transform transition-all scale-100">
+      <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500 animate-pulse"></div>
+      <div class="w-24 h-24 bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+        <i class="fa-solid fa-check text-5xl text-emerald-400"></i>
+      </div>
+      <h2 class="text-3xl font-black text-emerald-400 mb-2 uppercase tracking-tighter italic">Access Granted</h2>
+      <p id="success-message" class="text-slate-300 font-mono tracking-widest text-sm mb-8"></p>
+      <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all active:scale-95">
+        Acknowledge
+      </button>
+    </div>
+  </div>
+
+  <div id="delete-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[130] p-4">
+    <div class="bg-slate-900 border border-red-500/50 p-8 rounded-2xl w-full max-w-sm shadow-[0_0_20px_rgba(239,68,68,0.4)] text-center">
+      <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4 animate-pulse"></i>
+      <h2 class="text-xl font-bold text-red-400 mb-2 uppercase tracking-tighter italic">System Warning</h2>
+      <p class="text-slate-400 text-xs uppercase tracking-widest mb-6">Purge account <span id="delete-target-code" class="text-white font-bold bg-red-900/50 px-2 py-1 rounded mx-1"></span> from database?<br><br>This action is irreversible.</p>
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('delete-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded-lg font-bold text-xs uppercase hover:bg-slate-700 transition-colors">Abort</button>
+        <button onclick="confirmDeleteAction()" id="confirm-delete-btn" class="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold text-xs uppercase hover:bg-red-500 shadow-lg shadow-red-600/20 transition-all active:scale-95">Purge</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="add-branch-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[120] p-4">
+    <div class="bg-slate-900 border border-indigo-500/30 p-8 rounded-2xl w-full max-w-sm shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="h-1 w-8 bg-indigo-500"></div>
+        <h2 class="text-xl font-bold text-indigo-400 uppercase tracking-tighter italic">Deploy Branch</h2>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2 block">Branch Alias</label>
+          <input type="text" id="new-branch-name" placeholder="e.g. SECTOR 7G" class="w-full bg-slate-950 border border-slate-800 p-4 rounded-lg text-sm text-indigo-100 outline-none focus:border-indigo-500 uppercase transition-colors">
+        </div>
+        <div class="flex gap-2 pt-4">
+          <button onclick="document.getElementById('add-branch-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded-lg font-bold text-xs uppercase hover:bg-slate-700 transition">Cancel</button>
+          <button onclick="executeAddBranch()" id="add-branch-btn" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-bold text-xs uppercase hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20">Deploy Node</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="deploy-class-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[130] p-4">
+    <div class="bg-slate-900 border border-yellow-500/50 p-6 rounded-xl w-full max-w-md shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+      <h2 class="text-lg font-black text-yellow-500 uppercase tracking-tighter mb-4"><i class="fa-solid fa-bolt"></i> Initialize Class</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="text-[10px] text-yellow-500 font-bold uppercase">Session Time</label>
+          <select id="new-class-session" onchange="toggleCustomSession()" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none mt-1">
+            <option value="08:30 - 10:00">08:30 - 10:00</option>
+            <option value="10:15 - 11:45">10:15 - 11:45</option>
+            <option value="14:00 - 15:30">14:00 - 15:30</option>
+            <option value="16:00 - 17:30">16:00 - 17:30</option>
+            <option value="18:45 - 20:15">18:45 - 20:15</option>
+            <option value="custom">-- CUSTOM SESSION --</option>
+          </select>
+          <input type="text" id="new-class-custom-session" placeholder="e.g. 09:00 - 11:00" class="w-full bg-slate-950 border border-slate-700 p-3 rounded text-xs text-yellow-100 outline-none mt-2 hidden uppercase">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] text-yellow-500 font-bold uppercase">Schedule</label>
+            <select id="new-class-schedule" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none mt-1">
+              <option value="5x">5x a Week</option>
+              <option value="3x">3x a Week</option>
+              <option value="2x">2x a Week</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] text-yellow-500 font-bold uppercase">Class Level</label>
+            <input type="text" id="new-class-level" placeholder="e.g. ADVANCED" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none mt-1 uppercase">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-yellow-500 font-bold uppercase">Assigned Trainer</label>
+          <input type="text" id="trainer-search-input" onkeyup="populateTrainerDropdown()" placeholder="Type to search..." class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-xs text-white outline-none mt-1 mb-2 placeholder:text-slate-500 transition-colors focus:border-yellow-500">
+          
+          <select id="new-class-trainer" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none font-mono tracking-widest">
+            </select>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="document.getElementById('deploy-class-modal').classList.add('hidden')" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded font-bold text-xs uppercase hover:bg-slate-700">Cancel</button>
+          <button onclick="executeAddClass()" id="deploy-class-btn" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-yellow-950 py-3 rounded font-black text-xs uppercase hover:scale-[1.02] transition-transform">Execute</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dossier-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-[150] p-4 transition-all duration-300 opacity-0 scale-95">
+    <div class="bg-[#0f172a] border border-blue-500/30 p-0 rounded-2xl w-full max-w-lg shadow-[0_0_30px_rgba(59,130,246,0.2)] overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="bg-[#0b1120] p-6 border-b border-blue-900/50 relative">
+        <button onclick="closeDossier()" class="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-blue-900/30 border-2 border-blue-500 flex items-center justify-center text-blue-400 text-2xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <div>
+            <p id="dos-code" class="text-[10px] font-mono text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">TRN-000</p>
+            <h2 id="dos-name" class="text-2xl font-black text-white uppercase tracking-tighter leading-none">Trainer Name</h2>
+            <p id="dos-status" class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Main Trainer • Advanced</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-[#0b1120] p-4 rounded-xl border border-slate-800">
+            <p class="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">Monthly Presence</p>
+            <p id="dos-presence" class="text-2xl font-black text-emerald-400">0 Days</p>
+          </div>
+          <div class="bg-[#0b1120] p-4 rounded-xl border border-slate-800">
+            <p class="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">Current Capacity</p>
+            <p id="dos-capacity" class="text-2xl font-black text-yellow-500">0/5 Slots</p>
+          </div>
+        </div>
+
+        <a href="#" id="dos-wa-btn" target="_blank" class="w-full bg-emerald-900/20 border border-emerald-500/50 hover:bg-emerald-600 text-emerald-400 hover:text-white py-4 rounded-xl flex items-center justify-center gap-3 font-bold uppercase tracking-widest transition-all text-xs">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Contact Personnel
+        </a>
+
+        <div>
+          <p class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-blue-900/50 pb-2"><i class="fa-solid fa-bolt"></i> Active Deployment</p>
+          <div class="space-y-2" id="dos-classes-container">
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboard-view" class="fixed inset-0 bg-[#0b1120] hidden z-[110] flex font-mono overflow-hidden text-slate-300">
+    <aside id="admin-sidebar" class="w-64 bg-[#0f172a] border-r border-blue-900/30 flex flex-col transition-all duration-300 absolute top-0 left-0 bottom-0 md:relative z-[100] h-full -translate-x-full md:translate-x-0 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.5)] whitespace-nowrap">
+      <div class="p-6 border-b border-blue-900/30 flex items-center gap-3">
+        <div class="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white font-black"><i class="fa-solid fa-server"></i></div>
+        <h2 class="text-white font-black tracking-tighter text-lg uppercase">System Admin</h2>
+      </div>
+      
+      <div class="p-4 flex-1 overflow-y-auto">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Core Navigation</p>
+        <ul class="space-y-2">
+          <li><a href="#" onclick="switchAdminTab('personnel')" id="admin-tab-personnel" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-900/20 border border-blue-500/30 text-blue-400 text-sm transition-colors"><i class="fa-solid fa-users w-5"></i> Personnel DB</a></li>
+          <li><a href="#" onclick="switchAdminTab('classes')" id="admin-tab-classes" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-sm transition-colors text-slate-400"><i class="fa-solid fa-network-wired w-5"></i> Class Management</a></li>
+        </ul>
+      </div>
+
+      <div class="p-4 border-t border-blue-900/30">
+        <button onclick="terminateSession()" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-500 hover:bg-red-950/30 transition-colors text-sm font-bold uppercase tracking-widest">
+          <i class="fa-solid fa-power-off"></i> Terminate
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDM5LjVoNDBNMzkuNSAwdi00MCIgc3Ryb2tlPSJyZ2JhKDU5LCAxMzAsIDI0NiwgMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]">
+      
+      <header class="h-20 border-b border-blue-900/30 flex items-center justify-between px-6 bg-[#0b1120]/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <button onclick="toggleAdminSidebar()" class="text-slate-400 hover:text-white text-xl transition-colors"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="hidden sm:block text-xl font-black text-blue-500 uppercase italic tracking-tighter">Control Center</h1>
+        </div>
+        <div class="flex items-center gap-4 text-right">
+          <p class="text-red-500 font-bold text-xs uppercase tracking-widest">SYS_ADMIN</p>
+          <p class="text-slate-500 text-[10px] uppercase tracking-widest hidden sm:block">Level 4 Clearance</p>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 lg:p-10 relative">
+        
+        <div id="admin-personnel-panel" class="block space-y-8 max-w-7xl mx-auto">
+          <div id="stats-container"></div>
+          
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end mt-10 mb-4 gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-blue-400 uppercase tracking-tighter italic">Personnel Database</h2>
+              <p class="text-[10px] text-slate-500 uppercase tracking-widest">Active Accounts</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div class="relative w-full sm:w-64">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="text" id="personnel-search" onkeyup="filterPersonnel()" placeholder="Search Name or Code..." class="w-full bg-slate-900/80 border border-slate-700 p-2 pl-9 rounded text-xs text-slate-300 outline-none focus:border-blue-500 transition-colors uppercase font-mono tracking-widest">
+              </div>
+              
+              <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="bg-emerald-600/20 text-emerald-500 border border-emerald-500/50 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                <i class="fa-solid fa-plus"></i> Add Account
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto bg-slate-900/50 border border-slate-800 rounded-lg shadow-xl">
+            <table class="w-full text-left text-xs text-slate-400">
+              <thead class="bg-slate-900 text-blue-400 uppercase tracking-widest text-[10px]">
+                <tr>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Trainer Name</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Email</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Code</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Branch</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">WA Number</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Address</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Level</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Pref. Class</th>
+                  <th class="p-4 border-b border-slate-800 whitespace-nowrap">Status</th>
+                  <th class="p-4 border-b border-slate-800 text-right whitespace-nowrap sticky right-0 bg-slate-900 z-10 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">Action</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-body">
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="admin-classes-panel" class="hidden space-y-8 max-w-7xl mx-auto w-full">
+          
+          <div id="class-radar-view" class="block space-y-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+              <div>
+                <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Infrastructure Network</p>
+                <h1 class="text-3xl lg:text-5xl font-black text-white uppercase tracking-tighter">Class <span class="text-indigo-500">Management</span></h1>
+              </div>
+              
+              <button onclick="document.getElementById('add-branch-modal').classList.remove('hidden')" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/50 px-6 py-3 rounded text-xs font-bold uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                <i class="fa-solid fa-location-dot"></i> Deploy New Branch
+              </button>
+            </div>
+            
+            <div id="branch-cards-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pt-4">
+              </div>
+          </div>
+
+          <div id="class-detail-view" class="hidden animate-[fadeIn_0.3s_ease-out] w-full">
+          
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 mb-6 gap-4">
+            
+            <div class="flex items-center gap-4">
+              <button onclick="closeClassDetails()" class="text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded-lg border border-slate-700 flex items-center gap-2 text-xs font-bold uppercase tracking-widest shadow-md">
+                <i class="fa-solid fa-arrow-left"></i> Return to Grid
+              </button>
+              
+              <div class="hidden md:block">
+                <p class="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Active Node Deployment</p>
+                <h2 id="detail-branch-title" class="text-2xl font-black text-white uppercase tracking-tighter">BRANCH_NAME</h2>
+              </div>
+            </div>
+            
+            <button onclick="openDeployClassModal()" class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-yellow-950 px-5 py-2.5 rounded text-xs font-black uppercase hover:scale-105 transition-transform shadow-[0_0_20px_rgba(234,179,8,0.4)] flex items-center justify-center gap-2 w-full sm:w-auto">
+              <i class="fa-solid fa-bolt"></i> Deploy Class
+            </button>
+            
+          </div>
+          
+          <div id="gold-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            </div>
+          
+          </div> </div> </div> </main>
+  </div> <div id="manager-dashboard-view" class="fixed inset-0 bg-[#0b1120] hidden z-[110] flex font-mono overflow-hidden text-slate-300">
+    
+    <aside id="manager-sidebar" class="w-64 bg-[#0f172a] border-r border-blue-900/30 flex flex-col transition-all duration-300 absolute top-0 left-0 bottom-0 md:relative z-[100] h-full -translate-x-full md:translate-x-0 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.5)] whitespace-nowrap">
+      <div class="p-6 border-b border-blue-900/30 flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-black"><i class="fa-solid fa-shield-halved"></i></div>
+        <h2 class="text-white font-black tracking-tighter text-lg uppercase">Jimzkuy</h2>
+      </div>
+      
+      <div class="p-4 flex-1 overflow-y-auto">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Navigation</p>
+        
+        <ul class="space-y-2" id="manager-nav-links">
+          <li><a href="#" onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-sm transition-colors text-slate-400"><i class="fa-solid fa-border-all w-5"></i> Dashboard</a></li>
+          <li><a href="#" onclick="switchManagerTab('recap')" id="tab-btn-recap" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-sm transition-colors text-slate-400"><i class="fa-solid fa-clipboard-check w-5"></i> Recap Attendance</a></li>
+          <li><a href="#" onclick="switchManagerTab('geofence')" id="tab-btn-geofence" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-900/20 border border-blue-500/30 text-blue-400 text-sm"><i class="fa-solid fa-crosshairs w-5"></i> Geofence Control</a></li>
+        </ul>
+      </div>
+
+      <div class="p-4 border-t border-blue-900/30">
+        <button onclick="terminateSession()" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-500 hover:bg-red-950/30 transition-colors text-sm font-bold uppercase tracking-widest">
+          <i class="fa-solid fa-right-from-bracket"></i> Terminate
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDM5LjVoNDBNMzkuNSAwdi00MCIgc3Ryb2tlPSJyZ2JhKDU5LCAxMzAsIDI0NiwgMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]">
+      
+      <header class="h-20 border-b border-blue-900/30 flex items-center justify-between px-6 bg-[#0b1120]/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-bars"></i></button>
+          <div class="relative hidden sm:block">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" placeholder="Scan network perimeter..." class="bg-slate-900 border border-slate-700/50 rounded-lg py-2 pl-10 pr-4 w-96 text-sm focus:outline-none focus:border-blue-500 placeholder:text-slate-600">
+          </div>
+        </div>
+        <div class="flex items-center gap-4 hidden sm:block text-right">
+            <p class="text-white font-bold text-xs uppercase tracking-widest">MANAGER_ACCESS</p>
+            <p class="text-blue-500 text-[10px] uppercase tracking-widest">Level 3 Clearance</p>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 lg:p-10 relative">
+
+        <div id="dashboard-panel" class="hidden space-y-6 max-w-7xl mx-auto w-full">
+          
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+              <p class="text-purple-500 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> Global Analytics</p>
+              <h1 class="text-3xl lg:text-4xl font-black text-white uppercase tracking-tighter">System <span class="text-purple-500">Overview</span></h1>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 w-full md:w-auto bg-slate-900/50 p-2 rounded-xl border border-slate-800 shadow-lg items-center">
+              
+              <button onclick="exportDashboardToPDF()" id="export-pdf-btn" class="bg-red-600/20 border border-red-500 text-red-400 hover:bg-red-600 hover:text-white px-4 py-2 h-[40px] rounded text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.2)] mr-2">
+                <i class="fa-solid fa-file-pdf text-lg"></i> Export
+              </button>
+              <select id="global-branch" onchange="renderGlobalAnalytics()" class="bg-slate-950 border border-slate-700 p-2 rounded text-xs text-blue-100 outline-none focus:border-blue-500 uppercase tracking-widest font-bold cursor-pointer max-w-[130px]">
+                <option value="ALL">ALL BRANCHES</option>
+              </select>
+              <select id="global-month" onchange="renderGlobalAnalytics()" class="bg-slate-950 border border-slate-700 p-2 rounded text-xs text-purple-100 outline-none focus:border-purple-500 uppercase tracking-widest font-bold cursor-pointer">
+                <option value="January">January</option><option value="February">February</option><option value="March">March</option>
+                <option value="April">April</option><option value="May">May</option><option value="June">June</option>
+                <option value="July">July</option><option value="August">August</option><option value="September">September</option>
+                <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+              </select>
+              <input type="number" id="global-year" value="2026" onchange="renderGlobalAnalytics()" class="bg-slate-950 border border-slate-700 p-2 rounded text-xs text-purple-100 outline-none focus:border-purple-500 w-20 font-mono font-bold text-center">
+            </div>
+          </div>
+
+          <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-6 mb-2 border-b border-slate-800 pb-1"><i class="fa-solid fa-users text-blue-500"></i> Academics & Network</h2>
+          
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-slate-900/80 border-l-2 border-purple-500 p-4 rounded-r-xl shadow-lg relative overflow-hidden">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Active Students</p>
+              <h3 id="stat-total-active" class="text-2xl font-black text-white mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-l-2 border-red-500 p-4 rounded-r-xl shadow-lg relative overflow-hidden">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Cuti & Off</p>
+              <h3 id="stat-total-lost" class="text-2xl font-black text-red-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-l-2 border-indigo-500 p-4 rounded-r-xl shadow-lg relative overflow-hidden">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Active Branches</p>
+              <h3 id="stat-total-branches" class="text-2xl font-black text-indigo-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-l-2 border-emerald-500 p-4 rounded-r-xl shadow-lg relative overflow-hidden">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Active Classes</p>
+              <h3 id="stat-total-classes" class="text-2xl font-black text-emerald-400 mt-1">0</h3>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+            <div class="lg:col-span-2 bg-slate-900/80 border border-slate-800 p-4 rounded-xl shadow-lg relative">
+              <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-arrow-trend-up text-purple-500"></i> Yearly Trajectory</h3>
+              <div class="h-[180px] w-full relative"><canvas id="activeChart"></canvas></div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl shadow-lg relative">
+              <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-chart-pie text-emerald-500"></i> Frequencies</h3>
+              <div class="h-[180px] w-full relative"><canvas id="freqChart"></canvas></div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl shadow-lg relative">
+              <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-clock text-blue-500"></i> Time-Slots</h3>
+              <div class="h-[180px] w-full relative"><canvas id="scheduleChart"></canvas></div>
+            </div>
+          </div>
+
+          <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-2 border-b border-slate-800 pb-1"><i class="fa-solid fa-boxes-stacked text-amber-500"></i> Logistics & Assets</h2>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-slate-900/80 border-t-2 border-amber-500 p-4 rounded-b-xl shadow-lg">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Total Kertas</p>
+              <h3 id="stat-inv-kertas" class="text-xl font-black text-amber-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-t-2 border-amber-400 p-4 rounded-b-xl shadow-lg">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Print Paper</p>
+              <h3 id="stat-inv-print" class="text-xl font-black text-amber-300 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-t-2 border-cyan-500 p-4 rounded-b-xl shadow-lg">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Active Markers</p>
+              <h3 id="stat-inv-marker-act" class="text-xl font-black text-cyan-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-900/80 border-t-2 border-red-500 p-4 rounded-b-xl shadow-lg">
+              <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Dead Markers</p>
+              <h3 id="stat-inv-marker-dead" class="text-xl font-black text-red-400 mt-1">0</h3>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl shadow-lg relative">
+              <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-print text-amber-500"></i> Consumables Burn Rate</h3>
+              <div class="h-[200px] w-full relative"><canvas id="consumablesChart"></canvas></div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl shadow-lg relative flex items-center justify-between">
+              <div class="w-1/2">
+                <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4"><i class="fa-solid fa-gamepad text-cyan-500"></i> Hardware Status</h3>
+                <ul class="text-[10px] space-y-3 font-mono text-slate-300 font-bold">
+                  <li class="flex justify-between"><span>Remotes (TV):</span> <span id="stat-inv-tv" class="text-cyan-400">0</span></li>
+                  <li class="flex justify-between"><span>Remotes (AC):</span> <span id="stat-inv-ac" class="text-cyan-400">0</span></li>
+                  <li class="flex justify-between"><span>Erasers:</span> <span id="stat-inv-eraser" class="text-cyan-400">0</span></li>
+                  <li class="flex justify-between"><span>Board Games:</span> <span id="stat-inv-games" class="text-cyan-400">0</span></li>
+                </ul>
+              </div>
+              <div class="h-[150px] w-1/2 relative"><canvas id="markerChart"></canvas></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="recap-panel" class="hidden space-y-8">
+          <div>
+            <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2"><i class="fa-solid fa-clock animate-pulse"></i> Time-Series Ledger</p>
+            <h1 class="text-3xl lg:text-5xl font-black text-white uppercase tracking-tighter">Recap <span class="text-emerald-500">Attendance</span></h1>
+          </div>
+
+          <div class="bg-[#0f172a]/80 border border-emerald-900/50 p-6 rounded-xl shadow-lg flex flex-col md:flex-row gap-4 items-end">
+             <div class="flex-1 w-full">
+               <label class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2 block">Select Cycle</label>
+               <select id="recap-month" class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-200 outline-none focus:border-emerald-500">
+                 <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                 <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                 <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                 <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+               </select>
+             </div>
+             <div class="flex-1 w-full">
+               <label class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2 block">Fiscal Year</label>
+               <input type="number" id="recap-year" value="2026" class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-200 outline-none focus:border-emerald-500">
+             </div>
+             
+             <div class="flex-1 w-full">
+               <label class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2 block">Target Branch</label>
+               <select id="recap-branch" class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-200 outline-none focus:border-emerald-500 uppercase">
+                 <option value="">ALL BRANCHES</option>
+               </select>
+             </div>
+
+             <button onclick="generateRecap()" id="recap-btn" class="w-full md:w-auto bg-emerald-600/20 border border-emerald-500 text-emerald-400 hover:bg-emerald-600 hover:text-white px-8 py-3 rounded font-bold text-sm uppercase tracking-widest transition-all">
+               Compile Ledger
+             </button>
+          </div>
+
+          <div class="bg-[#0f172a] border border-slate-800 rounded-xl overflow-x-auto shadow-2xl pb-2">
+             <table class="w-full text-left text-[10px] whitespace-nowrap">
+                <thead id="recap-head" class="text-slate-500 uppercase tracking-widest border-b border-slate-800 bg-[#0b1120]">
+                   </thead>
+                <tbody id="recap-body" class="divide-y divide-slate-800 text-slate-300">
+                   </tbody>
+             </table>
+          </div>
+        </div>
+
+        <div id="geofence-panel" class="block space-y-8">
+          <div>
+            <p class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2"><i class="fa-solid fa-satellite-dish animate-pulse"></i> Active Monitoring</p>
+            <h1 class="text-3xl lg:text-5xl font-black text-white uppercase tracking-tighter">Geofence <span class="text-blue-500">Control</span></h1>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="space-y-6">
+              <div class="bg-[#0f172a]/80 border border-blue-900/50 p-6 rounded-xl shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent"></div>
+                <h3 class="text-white font-bold text-lg flex items-center gap-2 mb-6"><i class="fa-solid fa-pen-to-square text-blue-500"></i> Coordinate Override</h3>
+                
+                <div class="space-y-5">
+                  <div>
+                    <label class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 block">Location Alias</label>
+                    <input type="text" id="geo-cabang" placeholder="e.g. Sector 7G Alpha" class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-200 outline-none focus:border-blue-500 transition-colors">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 block">Latitude</label>
+                    <div class="relative">
+                      <input type="text" id="geo-lat" readonly class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-400 outline-none">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 block">Longitude</label>
+                    <div class="relative">
+                      <input type="text" id="geo-lng" readonly class="w-full bg-[#0b1120] border border-slate-700 p-3 rounded text-sm text-slate-400 outline-none">
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-2">
+                      <label class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Radius (Meters)</label>
+                      <span id="geo-radius-display" class="text-[10px] font-bold text-emerald-400">100m</span>
+                    </div>
+                    <input type="range" id="geo-radius" min="10" max="5000" value="100" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                  </div>
+                  <button onclick="saveCoordinates()" id="geo-save-btn" class="w-full bg-blue-900/30 border border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white py-4 rounded font-bold text-xs uppercase tracking-widest transition-all">
+                    Sync Coordinates
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-[#0f172a]/80 border border-slate-800 p-4 rounded-xl">
+                  <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Zones</p>
+                  <p id="stats-zones" class="text-2xl font-black text-white">0</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-2 relative bg-[#0f172a] border border-slate-800 rounded-xl overflow-hidden shadow-2xl h-[500px] lg:h-auto">
+              <div id="map-container" class="absolute inset-0 z-0"></div>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="text-slate-500 uppercase tracking-widest border-b border-slate-800">
+                  <tr>
+                    <th class="py-3 font-bold">Location Alias</th>
+                    <th class="py-3 font-bold">Coordinates (Lat, Lng)</th>
+                    <th class="py-3 font-bold">Radius</th>
+                    <th class="py-3 font-bold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="geofence-nodes-body" class="divide-y divide-slate-800">
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div> 
+    </main>
+  </div> 
+
+  <div id="pic-dashboard-view" class="fixed inset-0 bg-[#0b1120] hidden z-[110] flex font-mono overflow-hidden text-slate-300">
+    
+    <aside id="pic-sidebar" class="w-64 bg-[#0f172a] border-r border-emerald-900/30 flex flex-col transition-all duration-300 absolute top-0 left-0 bottom-0 md:relative z-[100] -translate-x-full md:translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.5)] whitespace-nowrap">
+      <div class="p-6 border-b border-emerald-900/30 flex items-center gap-3">
+        <div class="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center text-white font-black"><i class="fa-solid fa-user-shield"></i></div>
+        <h2 class="text-white font-black tracking-tighter text-lg uppercase">PIC Command</h2>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Workspaces</p>
+        <ul class="space-y-2">
+          <li><a href="#" onclick="switchPICTab('analytic')" id="pic-tab-analytic" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 text-sm transition-colors"><i class="fa-solid fa-chart-pie w-5"></i> Analytics</a></li>
+          <li><a href="#" onclick="switchPICTab('inventory')" id="pic-tab-inventory" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-sm transition-colors text-slate-400"><i class="fa-solid fa-boxes-stacked w-5"></i> Inventory</a></li>
+          <li><a href="#" onclick="switchPICTab('trainer')" id="pic-tab-trainer" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-sm transition-colors text-slate-400"><i class="fa-solid fa-id-badge w-5"></i> Trainer DB</a></li>
+        </ul>
+      </div>
+      <div class="p-4 border-t border-emerald-900/30">
+        <button onclick="terminateSession()" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-500 hover:bg-red-950/30 transition-colors text-sm font-bold uppercase tracking-widest">
+          <i class="fa-solid fa-power-off"></i> Disconnect
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDM5LjVoNDBNMzkuNSAwdi00MCIgc3Ryb2tlPSJyZ2JhKDU5LCAxMzAsIDI0NiwgMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]">
+      
+      <header class="h-20 border-b border-emerald-900/30 flex items-center justify-between px-6 bg-[#0b1120]/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <button onclick="togglePICSidebar()" class="text-slate-400 hover:text-white text-xl transition-colors"><i class="fa-solid fa-bars"></i></button>
+          <div>
+            <h1 class="text-xl font-black text-white uppercase italic tracking-tighter hidden sm:block">PIC Terminal</h1>
+            <p id="pic-identity-display" class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest"></p>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 lg:p-10 relative">
+        
+        <div id="pic-analytic-panel" class="block max-w-6xl mx-auto space-y-8">
+          <div class="bg-slate-900/80 border border-emerald-500/30 p-8 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-sm">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-transparent"></div>
+            <h2 class="text-emerald-400 font-black uppercase tracking-tighter mb-6 flex items-center gap-2"><i class="fa-solid fa-pen-nib"></i> Analytic Input Matrix</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div><select id="pic-branch" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500"></select></div>
+              <div>
+                <select id="pic-month" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500">
+                  <option value="January">January</option><option value="February">February</option><option value="March">March</option>
+                  <option value="April">April</option><option value="May">May</option><option value="June">June</option>
+                  <option value="July">July</option><option value="August">August</option><option value="September">September</option>
+                  <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                </select>
+              </div>
+              <div><input type="number" id="pic-year" value="2026" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500 font-mono"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 border-t border-slate-800 pt-6">
+              <div class="col-span-full text-emerald-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 border-b border-emerald-900/50 pb-1">Core Demographics</div>
+              <input type="number" id="pic-total" placeholder="Total Active" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-emerald-500">
+              <input type="number" id="pic-2x" placeholder="Freq 2x" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-emerald-500">
+              <input type="number" id="pic-3x" placeholder="Freq 3x" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-emerald-500">
+              <input type="number" id="pic-5x" placeholder="Freq 5x" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-emerald-500">
+              <div class="col-span-full text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-4 mb-2 border-b border-blue-900/50 pb-1">Mobility & Status</div>
+              <input type="number" id="pic-new" placeholder="New Students" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-blue-500">
+              <input type="number" id="pic-move" placeholder="Move" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-blue-500">
+              <input type="number" id="pic-cuti" placeholder="Cuti" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-blue-500">
+              <input type="number" id="pic-off" placeholder="Off" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-blue-500">
+              <div class="col-span-full text-yellow-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-4 mb-2 border-b border-yellow-900/50 pb-1">Time-Slot Capacity</div>
+              <input type="number" id="pic-s1" placeholder="08:30-10:00" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-yellow-500">
+              <input type="number" id="pic-s2" placeholder="10:15-11:45" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-yellow-500">
+              <input type="number" id="pic-s3" placeholder="14:00-15:30" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-yellow-500">
+              <input type="number" id="pic-s4" placeholder="16:00-17:30" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-yellow-500">
+              <input type="number" id="pic-s5" placeholder="18:45-20:15" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-yellow-500 lg:col-start-1">
+            </div>
+            <button onclick="executeSavePICData()" id="save-pic-btn" class="w-full mt-8 bg-emerald-600/20 border border-emerald-500 hover:bg-emerald-600 text-emerald-400 hover:text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm"><i class="fa-solid fa-cloud-arrow-up"></i> Sync Analytics</button>
+          </div>
+          
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl backdrop-blur-sm">
+            <div class="p-4 border-b border-slate-800 bg-slate-950/50 flex justify-between items-center">
+              <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Historical Analytics</h3>
+              <button onclick="loadPICTable()" class="text-emerald-500 hover:text-emerald-400 text-[10px] uppercase font-bold tracking-widest"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div class="overflow-x-auto"><table class="w-full text-left text-xs text-slate-400 whitespace-nowrap"><thead class="bg-[#0b1120] text-emerald-500 uppercase tracking-widest text-[9px] border-b border-slate-800"><tr><th class="p-4">Period</th><th class="p-4">Branch</th><th class="p-4">Total</th><th class="p-4">New</th><th class="p-4 text-right">Actions</th></tr></thead><tbody id="pic-history-body" class="divide-y divide-slate-800"></tbody></table></div>
+          </div>
+        </div>
+
+        <div id="pic-inventory-panel" class="hidden max-w-6xl mx-auto space-y-8">
+          <div class="bg-slate-900/80 border border-emerald-500/30 p-8 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-sm">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-transparent"></div>
+            <h2 class="text-emerald-400 font-black uppercase tracking-tighter mb-6 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Inventory Audit Matrix</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div><select id="inv-branch" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500"></select></div>
+              <div>
+                <select id="inv-month" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500">
+                  <option value="January">January</option><option value="February">February</option><option value="March">March</option>
+                  <option value="April">April</option><option value="May">May</option><option value="June">June</option>
+                  <option value="July">July</option><option value="August">August</option><option value="September">September</option>
+                  <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                </select>
+              </div>
+              <div><input type="number" id="inv-year" value="2026" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500 font-mono"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-800 pt-6">
+              <div class="col-span-full text-indigo-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 border-b border-indigo-900/50 pb-1">Consumables</div>
+              <input type="number" id="inv-kertas" placeholder="Pakai Kertas" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-indigo-500">
+              <input type="number" id="inv-printing" placeholder="Printing Paper" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-indigo-500">
+              <input type="number" id="inv-marker-act" placeholder="Marker Active" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-indigo-500">
+              <input type="number" id="inv-marker-inact" placeholder="Marker Inactive" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-indigo-500">
+              
+              <div class="col-span-full text-amber-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-4 mb-2 border-b border-amber-900/50 pb-1">Hardware & Tools</div>
+              <input type="number" id="inv-rem-tv" placeholder="Remote TV" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-amber-500">
+              <input type="number" id="inv-rem-ac" placeholder="Remote AC" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-amber-500">
+              <input type="number" id="inv-penghapus" placeholder="Penghapus" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-amber-500">
+              <input type="number" id="inv-boardgames" placeholder="Board Games" class="bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-amber-500">
+              
+              <div class="col-span-full mt-4"><input type="text" id="inv-notes" placeholder="Additional Notes / Reports" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-xs text-white outline-none focus:border-emerald-500"></div>
+            </div>
+
+            <button onclick="executeSaveInventory()" id="save-inv-btn" class="w-full mt-8 bg-emerald-600/20 border border-emerald-500 hover:bg-emerald-600 text-emerald-400 hover:text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm"><i class="fa-solid fa-cloud-arrow-up"></i> Sync Inventory</button>
+          </div>
+          
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl backdrop-blur-sm">
+            <div class="p-4 border-b border-slate-800 bg-slate-950/50 flex justify-between items-center">
+              <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Historical Inventory</h3>
+              <button onclick="loadInventoryTable()" class="text-emerald-500 hover:text-emerald-400 text-[10px] uppercase font-bold tracking-widest"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div class="overflow-x-auto"><table class="w-full text-left text-xs text-slate-400 whitespace-nowrap"><thead class="bg-[#0b1120] text-emerald-500 uppercase tracking-widest text-[9px] border-b border-slate-800"><tr><th class="p-4">Period</th><th class="p-4">Branch</th><th class="p-4">Kertas / Print</th><th class="p-4">Markers (A/I)</th><th class="p-4 text-right">Actions</th></tr></thead><tbody id="inv-history-body" class="divide-y divide-slate-800"></tbody></table></div>
+          </div>
+        </div>
+
+        <div id="pic-trainer-panel" class="hidden w-full space-y-8">
+          
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+            <div>
+              <p class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2"><i class="fa-solid fa-network-wired"></i> Personnel Network</p>
+              <h2 class="text-3xl font-black text-white uppercase tracking-tighter italic">Trainer <span class="text-blue-500">Database</span></h2>
+            </div>
+            <div class="relative w-full sm:w-80">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input type="text" id="pic-trainer-search" onkeyup="filterPICTrainers()" placeholder="Search Name or Code..." class="w-full bg-slate-900/80 border border-slate-700 p-3 pl-9 rounded-lg text-xs text-slate-300 outline-none focus:border-blue-500 transition-colors uppercase font-mono tracking-widest shadow-lg">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+
+            <div id="pic-admin-layer" class="hidden space-y-3 w-full">
+              <h3 class="text-red-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2 border-b border-red-900/50 pb-2"><i class="fa-solid fa-shield-halved"></i> Admins</h3>
+              <div class="overflow-auto max-h-[500px] bg-slate-900/80 border border-slate-800 rounded-xl shadow-xl backdrop-blur-sm custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-400 whitespace-nowrap">
+                  <thead class="bg-[#0b1120] text-red-400 uppercase tracking-widest text-[9px] border-b border-slate-800 sticky top-0 z-20 shadow-md">
+                    <tr><th class="p-4">Name</th><th class="p-4">Code</th><th class="p-4">Branch</th><th class="p-4">Contact (WA)</th><th class="p-4">Pref</th><th class="p-4">Level</th></tr>
+                  </thead>
+                  <tbody id="pic-admin-body" class="divide-y divide-slate-800"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="pic-main-layer" class="hidden space-y-3 w-full">
+              <h3 class="text-blue-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2 border-b border-blue-900/50 pb-2"><i class="fa-solid fa-chalkboard-user"></i> Main Trainers</h3>
+              <div class="overflow-auto max-h-[500px] bg-slate-900/80 border border-slate-800 rounded-xl shadow-xl backdrop-blur-sm custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-400 whitespace-nowrap">
+                  <thead class="bg-[#0b1120] text-blue-400 uppercase tracking-widest text-[9px] border-b border-slate-800 sticky top-0 z-20 shadow-md">
+                    <tr><th class="p-4">Name</th><th class="p-4">Code</th><th class="p-4">Branch</th><th class="p-4">Contact (WA)</th><th class="p-4">Pref</th><th class="p-4">Level</th></tr>
+                  </thead>
+                  <tbody id="pic-main-body" class="divide-y divide-slate-800"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="pic-sub-layer" class="hidden space-y-3 w-full">
+              <h3 class="text-purple-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2 border-b border-purple-900/50 pb-2"><i class="fa-solid fa-people-arrows"></i> Substitutes</h3>
+              <div class="overflow-auto max-h-[500px] bg-slate-900/80 border border-slate-800 rounded-xl shadow-xl backdrop-blur-sm custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-400 whitespace-nowrap">
+                  <thead class="bg-[#0b1120] text-purple-400 uppercase tracking-widest text-[9px] border-b border-slate-800 sticky top-0 z-20 shadow-md">
+                    <tr><th class="p-4">Name</th><th class="p-4">Code</th><th class="p-4">Branch</th><th class="p-4">Contact (WA)</th><th class="p-4">Pref</th><th class="p-4">Level</th></tr>
+                  </thead>
+                  <tbody id="pic-sub-body" class="divide-y divide-slate-800"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // --- REST API BRIDGE (FOR GITHUB / CUSTOM DOMAIN) ---
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxioWDc45zeAJT1pP26EyxCmrRAocxsnndarU4q21w8fo62dppIq9S0g2TjgfHatdmnHQ/exec";
+
+    const server = { 
+      call: async (action, data = {}) => {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          // text/plain bypasses strict browser cross-origin blocking
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+          // redirect: 'follow' is MANDATORY for Google Apps Script APIs
+          redirect: 'follow',
+          body: JSON.stringify({ action, data })
+        });
+        
+        const result = await response.json();
+        if (result.error) throw new Error(result.error);
+        return result;
+      } 
+    };
+    // --- GLOBAL MEMORY BANK (PRE-LOADED DATA) ---
+    let globalBranches = [];
+    let globalClasses = [];
+
+    let clickCount = 0; let clickTimer;
+    document.getElementById('secret-trigger').addEventListener('click', () => {
+      clickCount++; clearTimeout(clickTimer);
+      if (clickCount >= 3) { document.getElementById('admin-modal').classList.remove('hidden'); clickCount = 0; } 
+      else { clickTimer = setTimeout(() => { clickCount = 0; }, 1500); }
+    });
+
+    // --- UNIFIED CACHE LOADER ---
+    window.onload = () => {
+      // A. Load Trainer Data
+      const savedTrainerCode = localStorage.getItem('trainerCode');
+      if (savedTrainerCode) {
+        document.getElementById('trainer-code').value = savedTrainerCode;
+        document.getElementById('remember-me').checked = true;
+        document.querySelector('.dot').classList.add('translate-x-5', 'bg-blue-500');
+      }
+
+      // B. Load Admin Data
+      const savedAdminUser = localStorage.getItem('adminUser');
+      const savedAdminPass = localStorage.getItem('adminPass');
+      if (savedAdminUser && savedAdminPass) {
+        document.getElementById('admin-user').value = savedAdminUser;
+        document.getElementById('admin-pass').value = savedAdminPass;
+        document.getElementById('admin-remember').checked = true;
+        
+        // Safety check in case the modal hasn't fully rendered
+        const adminDot = document.querySelector('.admin-dot');
+        if(adminDot) adminDot.classList.add('translate-x-5', 'bg-blue-500');
+      }
+    };
+
+    document.getElementById('remember-me').addEventListener('change', function() {
+      const dot = document.querySelector('.dot');
+      if(this.checked) { dot.classList.add('translate-x-5', 'bg-blue-500'); } 
+      else { dot.classList.remove('translate-x-5', 'bg-blue-500'); localStorage.removeItem('trainerCode'); }
+    });
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `fixed top-10 right-10 p-4 rounded-lg border font-bold uppercase text-[12px] tracking-widest backdrop-blur-md transition-all duration-500 z-50 ${isError ? 'bg-red-950/80 border-red-500 text-red-500' : 'bg-blue-950/80 border-blue-500 text-blue-400'}`;
+      toast.style.transform = 'translateX(0)';
+      setTimeout(() => { toast.style.transform = 'translateX(200%)'; }, 4000);
+    }
+
+    async function handleCheckIn() {
+      const btn = document.getElementById('submit-btn');
+      const input = document.getElementById('trainer-code');
+      const remember = document.getElementById('remember-me');
+      const code = input.value.trim();
+
+      if (!code) return showToast("INPUT REQUIRED", true);
+      if (remember.checked) localStorage.setItem('trainerCode', code);
+
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> SEQUENCING...';
+      // Update this specific block inside handleCheckIn()
+      try {
+        const result = await server.call('VALIDATE_AND_CHECKIN', code);
+        
+        // REFINEMENT: Trigger the big success modal instead of the toast
+        document.getElementById('success-message').innerText = `WELCOME TO THE GRID, ${result.name}`;
+        document.getElementById('success-modal').classList.remove('hidden');
+        
+        if(!remember.checked) input.value = '';
+      } catch (err) {
+        showToast(err.message, true); // Keep toast for errors so it's not overwhelming
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>';
+      }
+    }
+
+    // --- UPGRADED ADMIN LOGIN FLOW (SMOOTH TRANSITION) ---
+    async function attemptAdminLogin() {
+      const username = document.getElementById('admin-user').value.trim();
+      const password = document.getElementById('admin-pass').value.trim();
+      const remember = document.getElementById('admin-remember').checked;
+      const btn = document.getElementById('admin-login-btn');
+      
+      if (!username || !password) return showToast("CREDENTIALS REQUIRED", true);
+
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> DECRYPTING...'; 
+      btn.disabled = true;
+      
+      try {
+        const session = await server.call('ADMIN_LOGIN', { username, password });
+        
+        if (remember) {
+          localStorage.setItem('adminUser', username);
+          localStorage.setItem('adminPass', password);
+        }
+
+        // Change button state to show it's loading the UI
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> LOADING SYSTEM...';
+
+        // Route based on role
+        if (session.role === 'Admin') {
+          await renderAdminDashboard(); 
+        } else if (session.role === 'Manager') {
+          document.getElementById('admin-modal').classList.add('hidden');
+          document.getElementById('manager-dashboard-view').classList.remove('hidden');
+          initMap();
+        } else if (session.role === 'PIC') {
+          document.getElementById('admin-modal').classList.add('hidden');
+          await renderPICDashboard(session.user);
+        }
+
+        showToast(`WELCOME, ${session.role.toUpperCase()} ${session.user}`, false);
+        
+        // ---> THE FIX: Reset the button silently in the background! <---
+        btn.innerHTML = 'Execute';
+        btn.disabled = false;
+        
+      } catch (err) {
+        showToast("USERNAME / PASSWORD INCORRECT", true);
+        btn.innerHTML = 'Execute'; 
+        btn.disabled = false;
+      }
+    }
+
+    async function handleCheckIn() {
+      const btn = document.getElementById('submit-btn');
+      const input = document.getElementById('trainer-code');
+      const remember = document.getElementById('remember-me');
+      
+      const code = input.value.trim().toUpperCase(); 
+      if (!code) return showToast("INPUT REQUIRED", true);
+
+      // --- SECURITY LAYER: DEVICE LOCK ---
+      const lockedCode = localStorage.getItem('device_locked_trainer_code');
+      if (lockedCode) {
+        if (code !== lockedCode) return showToast(`SECURITY HALT: DEVICE BOUND TO [${lockedCode}]`, true);
+      } else {
+        localStorage.setItem('device_locked_trainer_code', code);
+      }
+
+      if (remember.checked) localStorage.setItem('trainerCode', code);
+
+      // --- MENGUNCI TOMBOL & MENCARI SATELIT ---
+      btn.disabled = true; 
+      btn.innerHTML = '<i class="fa-solid fa-satellite-dish animate-pulse"></i> ACQUIRING GPS...';
+
+      // Pastikan HP mendukung GPS
+      if (!navigator.geolocation) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>';
+        return showToast("GPS NOT SUPPORTED ON THIS DEVICE", true);
+      }
+
+      // Tembak satelit buat ambil Latitude & Longitude
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        try {
+          btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> SEQUENCING...';
+          
+          // BUNGKUS PAYLOAD DENGAN FORMAT YANG BENAR (Code + Lat + Lng)
+          const payload = {
+            code: code,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          // Tembak ke Backend
+          const result = await server.call('VALIDATE_AND_CHECKIN', payload);
+          
+          // Sukses
+          document.getElementById('success-message').innerText = `WELCOME TO THE GRID, ${result.name}`;
+          document.getElementById('success-modal').classList.remove('hidden');
+          
+          if(!remember.checked) input.value = '';
+        } catch (err) {
+          showToast(err.message, true); 
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>';
+        }
+      }, (geoError) => {
+        // Gagal ambil GPS (biasanya karena User nge-block izin lokasi)
+        btn.disabled = false;
+        btn.innerHTML = '<span>Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>';
+        showToast("GPS DENIED. PLEASE ALLOW LOCATION ACCESS.", true);
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    function clearDeviceLock() {
+      localStorage.removeItem('device_locked_trainer_code');
+      showToast("DEVICE SECURITY LOCK PURGED", false);
+    }
+
+    function resetCheckInBtn(btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Check-In</span><i class="fa-solid fa-bolt-lightning italic text-sm"></i>';
+    }
+
+    // --- UPGRADED DASHBOARD RENDERER (SEAMLESS SWAP) ---
+    async function renderAdminDashboard() {
+      // Fires all 4 requests to Google simultaneously
+      const [stats, accounts, branches, classes] = await Promise.all([
+        server.call('GET_ADMIN_STATS'),
+        server.call('GET_ACCOUNTS'),
+        server.call('GET_BRANCH_LIST').catch(() => []), // Failsafes
+        server.call('GET_ACTIVE_CLASSES').catch(() => [])
+      ]);
+
+      // Save to global memory bank
+      globalBranches = branches || [];
+      globalClasses = classes || [];
+
+      // Render the Personnel UI
+      document.getElementById('stats-container').innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-900 border-l-4 border-blue-500 p-6 rounded-r-xl shadow-lg">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Deployments Today</p>
+            <h3 class="text-3xl font-black text-white">${stats.activeToday}</h3>
+          </div>
+          <div class="bg-slate-900 border-l-4 border-indigo-500 p-6 rounded-r-xl shadow-lg">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Total Personnel</p>
+            <h3 class="text-3xl font-black text-white">${stats.totalStaff}</h3>
+          </div>
+          <div class="bg-slate-900 border-l-4 border-emerald-500 p-6 rounded-r-xl shadow-lg">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Active Branches</p>
+            <h3 class="text-3xl font-black text-emerald-400">${stats.totalBranches}</h3>
+          </div>
+        </div>
+      `;
+      renderAccountsTable(accounts);
+      
+      // PRE-RENDER THE CLASS UI SILENTLY IN THE BACKGROUND
+      renderBranchCardsUI();
+
+      // Seamlessly reveal dashboard
+      document.getElementById('admin-modal').classList.add('hidden');
+      const dashboard = document.getElementById('dashboard-view');
+      dashboard.classList.remove('hidden');
+      dashboard.classList.add('animate-[fadeIn_0.4s_ease-out]');
+    }
+
+    // --- INSTANT UI RENDERERS (NO LOADING SPINNERS) ---
+
+    function renderBranchCardsUI() {
+      const container = document.getElementById('branch-cards-container');
+      if (!container) return; 
+
+      if (globalBranches.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-slate-500 uppercase tracking-widest py-10 text-[10px] font-bold">No branch nodes detected. Click Deploy New Branch.</div>';
+        return;
+      }
+
+      const classCounts = {};
+      globalClasses.forEach(cls => {
+        const bName = cls[1] ? cls[1].toString().trim().toUpperCase() : '';
+        if (bName) classCounts[bName] = (classCounts[bName] || 0) + 1;
+      });
+
+      container.innerHTML = globalBranches.map(b => {
+        const branchName = b[0] ? b[0].toString().trim().toUpperCase() : 'UNKNOWN';
+        const count = classCounts[branchName] || 0;
+
+        return `
+          <div onclick="openClassDetails('${branchName}')" class="bg-white border border-slate-200 p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(234,179,8,0.3)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <button onclick="event.stopPropagation(); executeDeleteBranch('${branchName}')" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors z-20">
+              <i class="fa-solid fa-trash text-sm"></i>
+            </button>
+
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter group-hover:text-yellow-600 transition-colors duration-300 mb-4">${branchName}</h3>
+            
+            <div class="mt-auto flex justify-between items-end relative z-10">
+              <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest mb-1">Active Classes</p>
+                <p class="text-4xl font-black text-yellow-600 leading-none tracking-tighter">${count}</p>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
+                <i class="fa-solid fa-arrow-right -rotate-45"></i>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- UPDATED: LAYER 2 DRILL-DOWN (SOLID WHITE 3D THEME) ---
+    
+    function renderGoldCardsUI() {
+      const container = document.getElementById('gold-cards-container');
+      
+      const branchClasses = globalClasses.filter(row => row[1] && row[1].toString().trim().toUpperCase() === currentDrillDownBranch.toUpperCase());
+
+      if (branchClasses.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 text-[10px] uppercase font-bold tracking-widest border border-dashed border-slate-200 rounded-xl bg-white/50">No active classes deployed at this node.</div>';
+        return;
+      }
+
+      container.innerHTML = branchClasses.map(cls => {
+        const session = cls[2] || 'TBA';
+        const schedule = cls[3] || 'N/A';
+        const level = cls[4] || 'N/A';
+        const trainer = cls[5] || 'UNASSIGNED';
+
+        // Safe strings for the delete function so names with apostrophes don't crash it
+        const safeSession = session.replace(/'/g, "\\'");
+        const safeTrainer = trainer.replace(/'/g, "\\'");
+
+        return `
+          <div class="bg-white border-2 border-slate-200 border-b-[6px] border-b-yellow-500 p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(234,179,8,0.2)] hover:-translate-y-1 transition-all duration-200 relative group flex flex-col justify-between min-h-[160px]">
+            
+            <div class="absolute top-2 right-2 flex gap-2 opacity-30 group-hover:opacity-100 transition-opacity z-10">
+              <button onclick="executeDeleteClass('${safeSession}', '${safeTrainer}')" class="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 p-2 rounded flex items-center justify-center transition-colors shadow-sm" title="Purge Class">
+                <i class="fa-solid fa-trash text-[10px]"></i>
+              </button>
+            </div>
+            
+            <div class="absolute top-2 right-10 p-1 opacity-30 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-crown text-yellow-500 text-xs"></i></div>
+            
+            <p class="text-[9px] text-slate-500 uppercase font-bold tracking-widest border-b border-slate-200 pb-1 mb-2 mt-4">Class Info</p>
+            
+            <div class="space-y-2 flex-1">
+              <div>
+                <p class="text-[8px] text-slate-600 uppercase font-bold">Session</p>
+                <p class="text-xs text-black font-mono font-medium">${session}</p>
+              </div>
+              
+              <div class="flex gap-4">
+                <div>
+                  <p class="text-[8px] text-slate-600 uppercase font-bold">Freq</p>
+                  <p class="text-[10px] text-black font-medium">${schedule}</p>
+                </div>
+                <div>
+                  <p class="text-[8px] text-slate-600 uppercase font-bold">Level</p>
+                  <p class="text-[10px] text-black font-medium">${level}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-2 pt-1 border-t border-slate-200">
+              <p class="text-[8px] text-slate-600 uppercase font-bold">Trainer</p>
+              <p class="text-xs text-black font-black tracking-tighter truncate">${trainer}</p>
+            </div>
+            
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- UPGRADED: 9 Distinct Columns with Horizontal Scroll & Sticky Actions & WA CRM ---
+    function renderAccountsTable(accounts) {
+      document.getElementById('dashboard-body').innerHTML = accounts.map(row => {
+        // Escape quotes to prevent breaks in the onclick handler
+        const safeName = row[0] ? row[0].toString().replace(/'/g, "\\'") : '';
+        const safeEmail = row[1] ? row[1].toString().replace(/'/g, "\\'") : '';
+        const safeCode = row[2] ? row[2].toString().replace(/'/g, "\\'") : '';
+        const safeBranch = row[3] ? row[3].toString().replace(/'/g, "\\'") : '';
+        const safeWA = row[4] ? row[4].toString().replace(/'/g, "\\'") : '';
+        const safeAddress = row[5] ? row[5].toString().replace(/'/g, "\\'") : '';
+        const safeLevel = row[6] ? row[6].toString().replace(/'/g, "\\'") : '';
+        const safePref = row[7] ? row[7].toString().replace(/'/g, "\\'") : '';
+        const safeStatus = row[8] ? row[8].toString().replace(/'/g, "\\'") : '';
+
+        // --- NEW: WHATSAPP SMART LINK LOGIC ---
+        let rawWa = row[4] ? row[4].toString() : '';
+        let cleanWa = rawWa.replace(/\D/g, ''); // Removes all non-numbers (dashes, spaces)
+        if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.substring(1); // Converts 08 to 628
+        
+        let rawName = row[0] ? row[0].toString() : 'Team';
+        let waMessage = encodeURIComponent(`Hallo ${rawName}, how's it going?`);
+        let waLink = cleanWa ? `https://wa.me/${cleanWa}?text=${waMessage}` : '#';
+
+        // --- HTML GENERATION ---
+        return `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors text-[10px]">
+          <td class="p-4 text-slate-200 font-bold whitespace-nowrap">${row[0] || '-'}</td>
+          <td class="p-4 text-slate-400 whitespace-nowrap">${row[1] || '-'}</td>
+          <td class="p-4 font-mono text-blue-400 font-bold whitespace-nowrap">${row[2] || '-'}</td>
+          <td class="p-4 whitespace-nowrap"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded uppercase">${row[3] || '-'}</span></td>
+          
+          <td class="p-4 whitespace-nowrap">
+            ${cleanWa ? `
+            <a href="${waLink}" target="_blank" class="inline-flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition-all shadow-sm hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] font-bold text-[11px] uppercase tracking-widest">
+              <i class="fa-brands fa-whatsapp text-sm"></i> ${rawWa}
+            </a>` : '<span class="text-slate-600">-</span>'}
+          </td>
+
+          <td class="p-4 text-slate-400 whitespace-nowrap max-w-[200px] truncate" title="${row[5] || '-'}">${row[5] || '-'}</td>
+          <td class="p-4 text-slate-300 whitespace-nowrap">${row[6] || '-'}</td>
+          <td class="p-4 text-amber-400 font-bold whitespace-nowrap">${row[7] || '-'}</td>
+          <td class="p-4 font-bold uppercase whitespace-nowrap ${row[8] === 'Main Trainer' ? 'text-blue-400' : (row[8] === 'Admin' ? 'text-red-500' : 'text-purple-400')}">${row[8] || '-'}</td>
+          
+          <td class="p-4 text-right whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur z-10 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
+            <div class="flex justify-end gap-3">
+              <button onclick="openEditModal('${safeName}', '${safeEmail}', '${safeCode}', '${safeBranch}', '${safeWA}', '${safeAddress}', '${safeLevel}', '${safePref}', '${safeStatus}')" class="text-amber-500 hover:text-amber-400 font-bold uppercase tracking-widest flex items-center gap-1 transition-colors">
+                <i class="fa-solid fa-pen"></i> Edit
+              </button>
+              <button onclick="executeDelete('${safeCode}')" class="text-red-500 hover:text-red-400 font-bold uppercase tracking-widest flex items-center gap-1 transition-colors">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `}).join('');
+    }
+
+    // --- UPGRADED: Map 9 Variables to the Edit Modal ---
+    function openEditModal(name, email, code, branch, wa, address, level, pref, status) {
+      document.getElementById('edit-original-code').value = code; 
+      document.getElementById('edit-name').value = name;
+      document.getElementById('edit-email').value = email;
+      document.getElementById('edit-code').value = code;
+      document.getElementById('edit-branch').value = branch;
+      
+      document.getElementById('edit-wa').value = wa;
+      document.getElementById('edit-address').value = address;
+      
+      // Select elements will safely default if the value is empty
+      document.getElementById('edit-level').value = level || "Basic";
+      document.getElementById('edit-pref').value = pref || "SD";
+      document.getElementById('edit-status').value = status || "Main Trainer";
+      
+      document.getElementById('edit-modal').classList.remove('hidden');
+    }
+
+    async function executeUpdateAccount() {
+      const btn = document.getElementById('edit-btn');
+      
+      // REFINED: Now capturing all 9 variables from the Edit Modal
+      const payload = {
+        originalCode: document.getElementById('edit-original-code').value,
+        name: document.getElementById('edit-name').value.trim(),
+        email: document.getElementById('edit-email').value.trim(),
+        code: document.getElementById('edit-code').value.trim(),
+        branch: document.getElementById('edit-branch').value.trim(),
+        wa: document.getElementById('edit-wa').value.trim(),
+        address: document.getElementById('edit-address').value.trim(),
+        level: document.getElementById('edit-level').value,
+        prefClass: document.getElementById('edit-pref').value,
+        status: document.getElementById('edit-status').value
+      };
+
+      if(!payload.name || !payload.code) return showToast("NAME AND CODE REQUIRED", true);
+
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> UPDATING...'; 
+      btn.disabled = true;
+      
+      try {
+        await server.call('UPDATE_ACCOUNT', payload);
+        showToast("PERSONNEL DATA UPDATED", false);
+        document.getElementById('edit-modal').classList.add('hidden');
+        
+        // Refresh table silently
+        const accounts = await server.call('GET_ACCOUNTS');
+        renderAccountsTable(accounts);
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.innerHTML = 'UPDATE'; 
+        btn.disabled = false;
+      }
+    }
+
+    async function executeAddAccount() {
+      const btn = document.getElementById('add-btn');
+      const payload = {
+        name: document.getElementById('new-name').value.trim(),
+        email: document.getElementById('new-email').value.trim(),
+        code: document.getElementById('new-code').value.trim(),
+        branch: document.getElementById('new-branch').value.trim(),
+        wa: document.getElementById('new-wa').value.trim(),
+        address: document.getElementById('new-address').value.trim(),
+        level: document.getElementById('new-level').value,
+        prefClass: document.getElementById('new-pref').value,
+        status: document.getElementById('new-status').value
+      };
+      if(!payload.name || !payload.code) return showToast("NAME AND CODE REQUIRED", true);
+      
+      // ... rest of your ADD logic stays the same ...
+
+      btn.innerHTML = 'DEPLOYING...'; btn.disabled = true;
+      try {
+        await server.call('ADD_ACCOUNT', payload);
+        showToast("PERSONNEL ADDED SUCCESSFULLY", false);
+        document.getElementById('add-modal').classList.add('hidden');
+        
+        // Reset inputs
+        ['new-name', 'new-email', 'new-code', 'new-branch'].forEach(id => document.getElementById(id).value = '');
+        
+        // Refresh table
+        const accounts = await server.call('GET_ACCOUNTS');
+        renderAccountsTable(accounts);
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.innerHTML = 'DEPLOY'; btn.disabled = false;
+      }
+    }
+
+    // REFINEMENT: Global variable to hold the code while the modal is open
+    let accountToPurge = null;
+
+    // This just opens the UI modal now, no native alert
+    function executeDelete(code) {
+      accountToPurge = code;
+      document.getElementById('delete-target-code').innerText = code;
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    // This actually runs the backend deletion when they click "PURGE"
+    async function confirmDeleteAction() {
+      if(!accountToPurge) return;
+      
+      const btn = document.getElementById('confirm-delete-btn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>'; 
+      btn.disabled = true;
+
+      try {
+        await server.call('DELETE_ACCOUNT', accountToPurge);
+        showToast(`ACCOUNT ${accountToPurge} TERMINATED`, false);
+        document.getElementById('delete-modal').classList.add('hidden');
+        
+        // Refresh table silently in the background
+        const accounts = await server.call('GET_ACCOUNTS');
+        renderAccountsTable(accounts);
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.innerHTML = 'PURGE'; 
+        btn.disabled = false;
+        accountToPurge = null; // Clear memory
+      }
+    }
+
+    // --- ADMIN UI LOGIC ---
+
+    // 1. Show/Hide Password Toggle
+    function toggleAdminPassword() {
+      const passInput = document.getElementById('admin-pass');
+      const icon = document.getElementById('admin-pass-icon');
+      
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash', 'text-blue-400');
+      } else {
+        passInput.type = 'password';
+        icon.classList.remove('fa-eye-slash', 'text-blue-400');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // 2. Admin Checkbox Animation & Clear Cache
+    document.getElementById('admin-remember').addEventListener('change', function() {
+      const dot = document.querySelector('.admin-dot');
+      if(this.checked) { 
+        dot.classList.add('translate-x-5', 'bg-blue-500'); 
+      } else { 
+        dot.classList.remove('translate-x-5', 'bg-blue-500'); 
+        localStorage.removeItem('adminUser');
+        localStorage.removeItem('adminPass');
+      }
+    });
+
+    // --- MANAGER GEOFENCE LOGIC ---
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('manager-sidebar');
+      sidebar.classList.toggle('-translate-x-full');
+    }
+
+    document.getElementById('geo-radius')?.addEventListener('input', (e) => {
+      document.getElementById('geo-radius-display').innerText = e.target.value + 'm';
+      if (circle) circle.setRadius(e.target.value);
+    });
+
+    let map, marker, circle;
+
+    async function initMap() {
+      if (map) return;
+      
+      map = L.map('map-container', { zoomControl: false }).setView([-0.7893, 113.9213], 5);
+      
+      // REFINED: Google Maps Hybrid Layer (Satellite + Street Names)
+      L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps',
+        maxZoom: 20
+      }).addTo(map);
+
+      L.control.zoom({ position: 'topright' }).addTo(map);
+
+      await loadGeofenceData();
+
+      map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.event ? e.event.lngLat.lng : e.latlng.lng; 
+        const radius = document.getElementById('geo-radius').value;
+        
+        document.getElementById('geo-lat').value = lat.toFixed(6);
+        document.getElementById('geo-lng').value = lng.toFixed(6);
+
+        updateMapTarget(lat, lng, radius);
+      });
+    }
+
+    function updateMapTarget(lat, lng, radius) {
+      if (marker) map.removeLayer(marker);
+      if (circle) map.removeLayer(circle);
+
+      const cyberIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="width:12px; height:12px; background:#3b82f6; border:2px solid #fff; border-radius:50%; box-shadow: 0 0 10px #3b82f6;"></div>`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+      });
+
+      marker = L.marker([lat, lng], {icon: cyberIcon}).addTo(map);
+      circle = L.circle([lat, lng], { 
+        color: '#3b82f6', 
+        fillColor: '#3b82f6', 
+        fillOpacity: 0.1, 
+        weight: 1,
+        radius: parseInt(radius) 
+      }).addTo(map);
+    }
+
+    async function loadGeofenceData() {
+      const coords = await server.call('GET_COORDINATES');
+      document.getElementById('stats-zones').innerText = coords.length;
+      
+      coords.forEach(row => {
+        L.circle([row[1], row[2]], { color: '#10b981', fillColor: '#10b981', fillOpacity: 0.05, weight: 1, radius: row[3] })
+          .bindPopup(`<b class="text-slate-800">${row[0]}</b>`)
+          .addTo(map);
+      });
+
+      document.getElementById('geofence-nodes-body').innerHTML = coords.map(row => `
+        <tr class="hover:bg-slate-800/30 transition-colors">
+          <td class="py-4 text-blue-400 font-bold">${row[0]}</td>
+          <td class="py-4 text-slate-400 font-mono text-[10px]">${row[1]}, ${row[2]}</td>
+          <td class="py-4 text-slate-300 font-bold">${row[3]}m</td>
+          <td class="py-4 text-right">
+            <button onclick="editGeofence('${row[0]}', ${row[1]}, ${row[2]}, ${row[3]})" class="text-blue-500 hover:text-white text-[10px] uppercase font-bold tracking-widest transition-colors">Configure</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function editGeofence(alias, lat, lng, radius) {
+      document.getElementById('geo-cabang').value = alias;
+      document.getElementById('geo-lat').value = lat;
+      document.getElementById('geo-lng').value = lng;
+      document.getElementById('geo-radius').value = radius;
+      document.getElementById('geo-radius-display').innerText = radius + 'm';
+      
+      map.setView([lat, lng], 15);
+      updateMapTarget(lat, lng, radius);
+    }
+
+    async function saveCoordinates() {
+      const btn = document.getElementById('geo-save-btn');
+      const payload = {
+        cabang: document.getElementById('geo-cabang').value.trim(),
+        lat: document.getElementById('geo-lat').value,
+        lng: document.getElementById('geo-lng').value,
+        radius: document.getElementById('geo-radius').value
+      };
+
+      if(!payload.cabang || !payload.lat) return showToast("SELECT ALIAS AND TARGET LOCATION", true);
+
+      btn.innerHTML = 'SYNCING...'; btn.disabled = true;
+      try {
+        await server.call('SAVE_COORDINATE', payload);
+        showToast(`PERIMETER SECURED: ${payload.cabang}`, false);
+        await loadGeofenceData(); 
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.innerHTML = 'SYNC COORDINATES'; btn.disabled = false;
+      }
+    }
+
+    async function loadBranchDropdown() {
+      try {
+        const branches = await server.call('GET_BRANCHES');
+        document.getElementById('recap-branch').innerHTML = '<option value="">ALL BRANCHES</option>' + 
+          branches.map(b => `<option value="${b.toLowerCase()}">${b.toUpperCase()}</option>`).join('');
+      } catch (err) { showToast("FAILED TO LOAD BRANCHES", true); }
+    }
+
+    // --- MANAGER UI LOGIC ---
+    function toggleSidebar() { // Manager Burger Toggle
+      const sidebar = document.getElementById('manager-sidebar');
+      sidebar.classList.toggle('-translate-x-full'); // Mobile Slide
+      sidebar.classList.toggle('md:-ml-64');         // Desktop Clean Hide
+    }
+
+    function switchManagerTab(tabId) {
+      document.getElementById('dashboard-panel').classList.add('hidden');
+      document.getElementById('recap-panel').classList.add('hidden');
+      document.getElementById('geofence-panel').classList.add('hidden');
+      
+      document.getElementById(`${tabId}-panel`).classList.remove('hidden');
+
+      const btnDash = document.getElementById('tab-btn-dashboard');
+      const btnRecap = document.getElementById('tab-btn-recap');
+      const btnGeo = document.getElementById('tab-btn-geofence');
+      
+      const inactiveClass = "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors hover:bg-slate-800 text-slate-400";
+      btnDash.className = inactiveClass; btnRecap.className = inactiveClass; btnGeo.className = inactiveClass;
+
+      if(tabId === 'geofence') {
+        btnGeo.className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-900/20 border border-blue-500/30 text-blue-400 text-sm";
+        setTimeout(() => { if (map) map.invalidateSize(); }, 100);
+      } else if(tabId === 'recap') {
+        btnRecap.className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 text-sm";
+        document.getElementById('recap-month').value = new Date().getMonth();
+        document.getElementById('recap-year').value = new Date().getFullYear();
+        loadBranchDropdown(); 
+      } else {
+        btnDash.className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-purple-900/20 border border-purple-500/30 text-purple-400 text-sm";
+        // ---> THE REFINEMENT: Fire the Global Analytics engine when they open the dashboard! <---
+        loadGlobalAnalytics();
+      }
+
+      // NEW: Auto-hide sidebar on mobile after clicking
+      if (window.innerWidth < 768) {
+        document.getElementById('manager-sidebar').classList.add('-translate-x-full');
+      }
+    }
+
+    async function generateRecap() {
+      const btn = document.getElementById('recap-btn');
+      const month = document.getElementById('recap-month').value;
+      const year = document.getElementById('recap-year').value;
+      const branchFilter = document.getElementById('recap-branch').value.trim().toLowerCase();
+      
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> COMPILING...';
+      btn.disabled = true;
+
+      try {
+        const presenceData = await server.call('GET_PRESENCE_DATA', { month, year });
+        const daysInMonth = new Date(year, parseInt(month) + 1, 0).getDate();
+        
+        let theadHTML = `<tr><th class="p-4 font-bold sticky left-0 bg-[#0b1120] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.5)] border-r border-slate-800">Personnel Roster</th>`;
+        for(let i=1; i<=daysInMonth; i++) {
+          theadHTML += `<th class="p-3 text-center border-l border-slate-800/50">${i}</th>`;
+        }
+        theadHTML += `</tr>`;
+        document.getElementById('recap-head').innerHTML = theadHTML;
+
+        const pivot = {};
+        presenceData.forEach(row => {
+           const code = row[1]; // Column B (Code)
+           const branch = row[2] ? row[2].toString().trim() : ''; // Column C (Branch)
+           
+           // APPLY FILTER: Skip this row if it doesn't match the selected dropdown branch
+           if (branchFilter && branch.toLowerCase() !== branchFilter) return;
+
+           const timestamp = new Date(row[3]); // Column D (Date/Time)
+           const day = timestamp.getDate();
+           
+           if(!pivot[code]) pivot[code] = { name: row[0], branch: branch, days: {} };
+           
+           const timeStr = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+           if(!pivot[code].days[day]) pivot[code].days[day] = timeStr;
+        });
+
+        let tbodyHTML = '';
+        for(const code in pivot) {
+           const trainer = pivot[code];
+           const presenceCount = Object.keys(trainer.days).length;
+           tbodyHTML += `<tr class="hover:bg-blue-900/20 transition-colors cursor-pointer" onclick="openTrainerDossier('${trainer.name}', '${code}', ${presenceCount})">
+             <td class="p-4 sticky left-0 bg-[#0f172a] z-10 border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                <div class="font-bold text-emerald-400 text-xs">${trainer.name}</div>
+                <div class="text-slate-500 text-[9px] mt-1">${code} | ${trainer.branch}</div>
+             </td>`;
+             
+           for(let i=1; i<=daysInMonth; i++) {
+             const time = trainer.days[i] || '-';
+             const textClass = time !== '-' ? 'text-emerald-400 font-black' : 'text-slate-700 font-light';
+             tbodyHTML += `<td class="p-3 text-center border-l border-slate-800/50 ${textClass}">${time}</td>`;
+           }
+           tbodyHTML += `</tr>`;
+        }
+        
+        if(Object.keys(pivot).length === 0) {
+           tbodyHTML = `<tr><td colspan="${daysInMonth + 1}" class="p-8 text-center text-slate-500 uppercase tracking-widest italic">No deployments recorded for this cycle</td></tr>`;
+        }
+
+        document.getElementById('recap-body').innerHTML = tbodyHTML;
+
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.innerHTML = 'Compile Ledger';
+        btn.disabled = false;
+      }
+    }
+
+    // --- UPGRADED BURGER MENU LOGIC ---
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('admin-sidebar');
+      sidebar.classList.toggle('-translate-x-full'); // Mobile Slide
+      sidebar.classList.toggle('md:-ml-64');         // Desktop Clean Hide
+    }
+
+    function switchAdminTab(tabId) {
+      document.getElementById('admin-personnel-panel').classList.add('hidden');
+      document.getElementById('admin-classes-panel').classList.add('hidden');
+      
+      document.getElementById(`admin-${tabId}-panel`).classList.remove('hidden');
+
+      const btnPers = document.getElementById('admin-tab-personnel');
+      const btnClass = document.getElementById('admin-tab-classes');
+      
+      const inactiveClass = "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors hover:bg-slate-800 text-slate-400";
+      
+      btnPers.className = inactiveClass;
+      btnClass.className = inactiveClass;
+
+      if(tabId === 'personnel') {
+        btnPers.className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-900/20 border border-blue-500/30 text-blue-400 text-sm transition-colors";
+      } else if(tabId === 'classes') {
+        btnClass.className = "flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-900/20 border border-indigo-500/30 text-indigo-400 text-sm transition-colors";
+      }
+
+      // NEW: Auto-hide sidebar on mobile after clicking
+      if (window.innerWidth < 768) {
+        document.getElementById('admin-sidebar').classList.add('-translate-x-full');
+      }
+    }
+
+    // --- CLASS MANAGEMENT: LAYER 1 LOGIC ---
+
+    async function loadBranchCards() {
+      const container = document.getElementById('branch-cards-container');
+      if (!container) return; 
+
+      container.innerHTML = '<div class="col-span-full text-center text-indigo-500 py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4"></i><p class="text-xs font-bold tracking-widest uppercase">Scanning Network...</p></div>';
+
+      try {
+        const branches = await server.call('GET_BRANCH_LIST');
+        
+        if (!branches || branches.length === 0) {
+          container.innerHTML = '<div class="col-span-full text-center text-slate-500 uppercase tracking-widest py-10 text-[10px] font-bold">No branch nodes detected. Click Deploy New Branch.</div>';
+          return;
+        }
+
+        let classes = [];
+        try { classes = await server.call('GET_ACTIVE_CLASSES'); } 
+        catch (e) { console.warn("Active Classes sheet missing, defaulting to 0."); }
+
+        const classCounts = {};
+        classes.forEach(cls => {
+          const bName = cls[1] ? cls[1].toString().trim().toUpperCase() : '';
+          if (bName) classCounts[bName] = (classCounts[bName] || 0) + 1;
+        });
+
+        container.innerHTML = branches.map(b => {
+          const branchName = b[0] ? b[0].toString().trim().toUpperCase() : 'UNKNOWN';
+          const count = classCounts[branchName] || 0;
+
+          // REFINED: Pure White Cards with High-Contrast Dark Text
+          return `
+            <div onclick="openClassDetails('${branchName}')" class="bg-white border border-slate-200 p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(99,102,241,0.2)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              <button onclick="event.stopPropagation(); executeDeleteBranch('${branchName}')" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors z-20">
+                <i class="fa-solid fa-trash text-sm"></i>
+              </button>
+              
+              <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter group-hover:text-indigo-600 transition-colors duration-300 mb-4">${branchName}</h3>
+              
+              <div class="mt-auto flex justify-between items-end relative z-10">
+                <div>
+                  <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest mb-1">Active Classes</p>
+                  <p class="text-4xl font-black text-indigo-600 leading-none tracking-tighter">${count}</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                  <i class="fa-solid fa-arrow-right -rotate-45"></i>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        container.innerHTML = `<div class="col-span-full text-center text-red-500 uppercase tracking-widest py-10 text-[10px] font-bold">SYSTEM ERROR: ${err.message}</div>`;
+      }
+    }
+
+    async function executeAddBranch() {
+      const btn = document.getElementById('add-branch-btn');
+      const input = document.getElementById('new-branch-name');
+      const branchName = input.value.trim();
+
+      if(!branchName) return showToast("BRANCH ALIAS REQUIRED", true);
+
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>'; 
+      btn.disabled = true;
+      
+      try {
+        await server.call('ADD_NEW_BRANCH', branchName);
+        showToast(`NODE ${branchName.toUpperCase()} DEPLOYED`, false);
+        document.getElementById('add-branch-modal').classList.add('hidden');
+        input.value = '';
+        
+        loadBranchCards(); 
+      } catch (err) {
+        showToast(err.message, true); 
+      } finally {
+        btn.innerHTML = 'Deploy Node'; 
+        btn.disabled = false;
+      }
+    }
+
+    async function executeDeleteBranch(branchName) {
+      const toast = document.createElement('div');
+      // REFINED: Fixed dead center with a smooth zoom-in effect
+      toast.className = "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-slate-900 border border-red-500/50 p-6 rounded-2xl shadow-[0_0_40px_rgba(239,68,68,0.4)] z-[200] flex flex-col gap-4 text-center opacity-0 scale-95 transition-all duration-300";
+      
+      toast.innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation text-red-500 animate-pulse text-4xl mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]"></i>
+        <div>
+          <h4 class="text-lg font-black text-white uppercase tracking-tighter">Terminate Node?</h4>
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Target: <span class="text-red-400">${branchName}</span></p>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button id="toast-cancel" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded text-xs font-bold uppercase hover:bg-slate-700 transition">Abort</button>
+          <button id="toast-confirm" class="flex-1 bg-red-600 text-white py-3 rounded text-xs font-bold uppercase hover:bg-red-500 transition shadow-lg shadow-red-600/20">Purge</button>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'scale-95'); });
+
+      toast.querySelector('#toast-cancel').onclick = () => {
+        toast.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => toast.remove(), 300);
+      };
+
+      toast.querySelector('#toast-confirm').onclick = async () => {
+        toast.innerHTML = `<div class="p-4 text-center text-red-500 text-sm font-bold uppercase tracking-widest"><i class="fa-solid fa-spinner animate-spin text-2xl mb-2 block"></i> Purging...</div>`;
+        try {
+          await server.call('DELETE_BRANCH', branchName);
+          toast.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => toast.remove(), 300);
+          showToast(`NODE ${branchName} PURGED`, false);
+          loadBranchCards(); 
+        } catch (err) {
+          toast.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => toast.remove(), 300);
+          showToast(err.message, true);
+        }
+      };
+    }
+
+// --- LAYER 2: CLASS DRILL-DOWN LOGIC ---
+    let currentDrillDownBranch = '';
+
+    function openClassDetails(branchName) {
+      currentDrillDownBranch = branchName;
+      document.getElementById('class-radar-view').classList.add('hidden');
+      document.getElementById('class-detail-view').classList.remove('hidden');
+      document.getElementById('detail-branch-title').innerText = branchName;
+      
+      renderGoldCardsUI(); // This now perfectly matches the function below
+    }
+
+    function closeClassDetails() {
+      currentDrillDownBranch = '';
+      document.getElementById('class-detail-view').classList.add('hidden');
+      document.getElementById('class-radar-view').classList.remove('hidden');
+      renderBranchCardsUI(); // Instantly updates the grid without reloading
+    }
+
+    function toggleCustomSession() {
+      const select = document.getElementById('new-class-session');
+      const customInput = document.getElementById('new-class-custom-session');
+      if (select.value === 'custom') {
+        customInput.classList.remove('hidden');
+      } else {
+        customInput.classList.add('hidden');
+        customInput.value = '';
+      }
+    }
+
+    async function executeAddClass() {
+      // 1. Safe Button Grab (Catches it whether you named it deploy-class-btn or add-class-btn)
+      const btn = document.getElementById('deploy-class-btn') || document.getElementById('add-class-btn');
+      if (!btn) return alert("SYSTEM HALT: Cannot find the Execute button ID.");
+
+      // 2. Safe Input Grabs (Ensures the HTML actually exists before trying to read it)
+      const sessionEl = document.getElementById('new-class-session');
+      const customEl = document.getElementById('new-class-custom-session');
+      const scheduleEl = document.getElementById('new-class-schedule');
+      const levelEl = document.getElementById('new-class-level');
+      const trainerEl = document.getElementById('new-class-trainer');
+
+      if (!sessionEl || !scheduleEl || !levelEl || !trainerEl) {
+        return alert("SYSTEM HALT: One of your form inputs is missing. Check the HTML IDs.");
+      }
+
+      // 3. Extract the Data
+      let session = sessionEl.value;
+      if (session === 'custom') session = customEl.value.trim();
+
+      const payload = {
+        branch: currentDrillDownBranch, // Pulled from the Layer 2 memory
+        session: session,
+        schedule: scheduleEl.value,
+        level: levelEl.value.trim(),
+        trainer: trainerEl.value.trim()
+      };
+
+      // Ensure no blank data gets sent
+      if (!payload.session || !payload.schedule || !payload.level || !payload.trainer) {
+        return showToast("PLEASE FILL ALL FIELDS", true);
+      }
+
+      // 4. Fire the Engine
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>'; 
+      btn.disabled = true;
+
+      try {
+        await server.call('ADD_ACTIVE_CLASS', payload);
+        showToast("CLASS DEPLOYED TO NODE", false);
+
+        // Hide Modal & Reset Form
+        const modal = document.getElementById('deploy-class-modal') || document.getElementById('add-class-modal');
+        if (modal) modal.classList.add('hidden');
+        
+        sessionEl.value = '08:30 - 10:00';
+        if (typeof toggleCustomSession === 'function') toggleCustomSession();
+        levelEl.value = '';
+        trainerEl.value = '';
+
+        // 5. Instant Global Memory Update
+        globalClasses.push([
+          new Date().toISOString(), 
+          payload.branch, 
+          payload.session, 
+          payload.schedule, 
+          payload.level, 
+          payload.trainer
+        ]);
+
+        // Snap the UI into place
+        if (typeof renderGoldCardsUI === 'function') renderGoldCardsUI(); 
+        if (typeof renderBranchCardsUI === 'function') renderBranchCardsUI(); 
+
+      } catch(err) {
+        showToast("SERVER ERROR: " + err.message, true);
+      } finally {
+        btn.innerHTML = 'Execute'; 
+        btn.disabled = false;
+      }
+    }
+
+    async function executeDeleteClass(session, trainer) {
+      // 1. Build the Custom UI Modal on the fly
+      const toast = document.createElement('div');
+      toast.className = "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-slate-900 border border-red-500/50 p-6 rounded-2xl shadow-[0_0_40px_rgba(239,68,68,0.4)] z-[200] flex flex-col gap-4 text-center opacity-0 scale-95 transition-all duration-300";
+      
+      toast.innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation text-red-500 animate-pulse text-4xl mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]"></i>
+        <div>
+          <h4 class="text-lg font-black text-white uppercase tracking-tighter">Terminate Class?</h4>
+          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 leading-relaxed">
+            Trainer: <span class="text-red-400">${trainer}</span><br>
+            Session: <span class="text-white">${session}</span>
+          </p>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button id="class-toast-cancel" class="flex-1 bg-slate-800 text-slate-400 py-3 rounded text-xs font-bold uppercase hover:bg-slate-700 transition">Abort</button>
+          <button id="class-toast-confirm" class="flex-1 bg-red-600 text-white py-3 rounded text-xs font-bold uppercase hover:bg-red-500 transition shadow-lg shadow-red-600/20">Purge</button>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      // Trigger the smooth zoom-in animation
+      requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'scale-95'); });
+
+      // 2. Handle Abort Action
+      toast.querySelector('#class-toast-cancel').onclick = () => {
+        toast.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => toast.remove(), 300);
+      };
+
+      // 3. Handle Execute Purge Action
+      toast.querySelector('#class-toast-confirm').onclick = async () => {
+        // Change UI to loading state
+        toast.innerHTML = `<div class="p-4 text-center text-red-500 text-sm font-bold uppercase tracking-widest"><i class="fa-solid fa-spinner animate-spin text-2xl mb-2 block"></i> Purging...</div>`;
+        
+        // Instantly snap the card off the screen (Global Memory update)
+        const targetIndex = globalClasses.findIndex(cls => 
+          cls[1] === currentDrillDownBranch && 
+          cls[2] === session && 
+          cls[5] === trainer
+        );
+
+        if(targetIndex > -1) {
+          globalClasses.splice(targetIndex, 1);
+          renderGoldCardsUI(); 
+          renderBranchCardsUI(); 
+        }
+
+        // Fire the kill order to the backend
+        try {
+          await server.call('DELETE_ACTIVE_CLASS', {
+            branch: currentDrillDownBranch,
+            session: session,
+            trainer: trainer
+          });
+          
+          toast.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => toast.remove(), 300);
+          showToast("CLASS PURGED FROM GRID", false);
+          
+        } catch(err) {
+          toast.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => toast.remove(), 300);
+          showToast(err.message, true);
+        }
+      };
+    }
+
+    function populateTrainerDropdown() {
+      const select = document.getElementById('new-class-trainer');
+      const searchBox = document.getElementById('trainer-search-input');
+      if (!select) return;
+
+      // Grab what the admin is typing
+      const filterText = searchBox ? searchBox.value.toUpperCase() : '';
+
+      select.innerHTML = '<option value="" disabled selected>-- SELECT TRAINER --</option>';
+
+      const workloads = {};
+      globalClasses.forEach(cls => {
+        const trainer = cls[5] ? cls[5].toString().trim().toUpperCase() : '';
+        if (trainer) workloads[trainer] = (workloads[trainer] || 0) + 1;
+      });
+
+      const rows = document.querySelectorAll('#dashboard-body tr');
+      const uniqueTrainers = new Set();
+
+      rows.forEach(row => {
+        const nameCell = row.cells[0]; 
+        if (nameCell) uniqueTrainers.add(nameCell.innerText.trim().toUpperCase());
+      });
+
+      uniqueTrainers.forEach(name => {
+        if (name === '-') return; 
+        
+        // THE FILTER: If they typed something, and it doesn't match the name, skip it!
+        if (filterText && !name.includes(filterText)) return;
+
+        const load = workloads[name] || 0;
+        let indicator = '🟢';
+        if (load >= 3) indicator = '🟡';
+        if (load >= 5) indicator = '🔴';
+
+        const option = document.createElement('option');
+        option.value = name;
+        
+        if (load >= 5) {
+          option.text = `${indicator} ${name} (MAX CAPACITY: 5/5)`;
+          option.disabled = true;
+          option.classList.add('text-red-500');
+        } else {
+          option.text = `${indicator} ${name} (Load: ${load}/5)`;
+        }
+
+        select.appendChild(option);
+      });
+    }
+
+    function openDeployClassModal() {
+      const modal = document.getElementById('deploy-class-modal') || document.getElementById('add-class-modal');
+      if (!modal) return alert("SYSTEM HALT: MODAL HTML NOT FOUND.");
+
+      // --> ADD THIS EXACT LINE HERE <--
+      populateTrainerDropdown(); 
+
+      // ... keep the rest of your reset logic ...
+      const sessionEl = document.getElementById('new-class-session');
+      if (sessionEl) sessionEl.value = '08:30 - 10:00';
+      if (typeof toggleCustomSession === 'function') toggleCustomSession();
+      
+      const levelEl = document.getElementById('new-class-level');
+      if (levelEl) levelEl.value = '';
+      
+      modal.classList.remove('hidden');
+    }
+
+    // --- NEW: PERSONNEL LIVE SEARCH FILTER ---
+    function filterPersonnel() {
+      const input = document.getElementById('personnel-search').value.toLowerCase();
+      const rows = document.querySelectorAll('#dashboard-body tr');
+
+      rows.forEach(row => {
+        // Name is column 1 (index 0), Code is column 3 (index 2)
+        const nameCell = row.querySelector('td:nth-child(1)');
+        const codeCell = row.querySelector('td:nth-child(3)');
+        
+        if (nameCell && codeCell) {
+          const nameText = nameCell.textContent.toLowerCase();
+          const codeText = codeCell.textContent.toLowerCase();
+          
+          // If the input matches the name OR the code, show the row. Otherwise, hide it.
+          if (nameText.includes(input) || codeText.includes(input)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    let currentPIC = "";
+
+    async function renderPICDashboard(picName) {
+      currentPIC = picName;
+      document.getElementById('pic-dashboard-view').classList.remove('hidden');
+      document.getElementById('pic-identity-display').innerText = `ACCESS KEY: ${picName} | CLEARANCE: PIC`;
+      
+      // Load Branches into Dropdown
+      try {
+        const branches = await server.call('GET_BRANCH_LIST');
+        document.getElementById('pic-branch').innerHTML = branches.map(b => `<option value="${b[0]}">${b[0]}</option>`).join('');
+      } catch (e) {
+        console.warn("Could not load branches for PIC", e);
+      }
+
+      // Auto-set current month and year
+      const date = new Date();
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('pic-month').value = months[date.getMonth()];
+      document.getElementById('pic-year').value = date.getFullYear();
+
+      // Load Historical Table
+      await loadPICTable();
+    }
+
+    async function loadPICTable() {
+      const tbody = document.getElementById('pic-history-body');
+      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-emerald-500"><i class="fa-solid fa-spinner animate-spin"></i> Retrieving Ledger...</td></tr>';
+      
+      try {
+        const data = await server.call('GET_PIC_DATA', currentPIC);
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-600 uppercase tracking-widest text-[10px] font-bold">No historical data found</td></tr>';
+          return;
+        }
+
+        // Sort by Year then Month (simplified for display)
+        tbody.innerHTML = data.reverse().map(row => {
+          // Serialize the row data so we can pass it to the edit function safely
+          const safeData = encodeURIComponent(JSON.stringify(row));
+          
+          return `
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="p-4 font-bold text-slate-200">${row[2]} ${row[3]}</td>
+              <td class="p-4"><span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded text-[10px]">${row[1]}</span></td>
+              <td class="p-4 font-black text-white">${row[4] || 0}</td>
+              <td class="p-4 text-blue-400 font-bold">+${row[8] || 0}</td>
+              <td class="p-4 text-slate-500">${row[9]||0} / ${row[10]||0} / ${row[11]||0}</td>
+              <td class="p-4 text-right">
+                <button onclick="editPICRow('${safeData}')" class="text-amber-500 hover:text-amber-400 uppercase font-bold text-[10px] tracking-widest transition-colors"><i class="fa-solid fa-pen"></i> Edit</button>
+                <button onclick="executeDeletePIC('${row[1]}', '${row[2]}', '${row[3]}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px] tracking-widest transition-colors" title="Purge"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500 uppercase text-[10px]">${err.message}</td></tr>`;
+      }
+    }
+
+    function editPICRow(encodedData) {
+      const row = JSON.parse(decodeURIComponent(encodedData));
+      
+      // Populate the form with the selected historical data
+      document.getElementById('pic-branch').value = row[1];
+      document.getElementById('pic-month').value = row[2];
+      document.getElementById('pic-year').value = row[3];
+      document.getElementById('pic-total').value = row[4];
+      document.getElementById('pic-2x').value = row[5];
+      document.getElementById('pic-3x').value = row[6];
+      document.getElementById('pic-5x').value = row[7];
+      document.getElementById('pic-new').value = row[8];
+      document.getElementById('pic-move').value = row[9];
+      document.getElementById('pic-cuti').value = row[10];
+      document.getElementById('pic-off').value = row[11];
+      document.getElementById('pic-s1').value = row[12];
+      document.getElementById('pic-s2').value = row[13];
+      document.getElementById('pic-s3').value = row[14];
+      document.getElementById('pic-s4').value = row[15];
+      document.getElementById('pic-s5').value = row[16];
+      
+      // Scroll to top to ensure they see the form
+      document.querySelector('#pic-dashboard-view .overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
+      showToast("DATA LOADED FOR EDITING", false);
+    }
+
+    async function executeSavePICData() {
+      const btn = document.getElementById('save-pic-btn');
+      
+      const payload = {
+        pic: currentPIC,
+        branch: document.getElementById('pic-branch').value,
+        month: document.getElementById('pic-month').value,
+        year: document.getElementById('pic-year').value,
+        totalActive: document.getElementById('pic-total').value || '',
+        f2x: document.getElementById('pic-2x').value || '',
+        f3x: document.getElementById('pic-3x').value || '',
+        f5x: document.getElementById('pic-5x').value || '',
+        newStudent: document.getElementById('pic-new').value || '',
+        move: document.getElementById('pic-move').value || '',
+        cuti: document.getElementById('pic-cuti').value || '',
+        off: document.getElementById('pic-off').value || '',
+        s1: document.getElementById('pic-s1').value || '',
+        s2: document.getElementById('pic-s2').value || '',
+        s3: document.getElementById('pic-s3').value || '',
+        s4: document.getElementById('pic-s4').value || '',
+        s5: document.getElementById('pic-s5').value || ''
+      };
+
+      if (!payload.branch || !payload.month || !payload.year) {
+        return showToast("CONFIGURATION FIELDS REQUIRED", true);
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> SYNCING MATRIX...';
+
+      try {
+        await server.call('SAVE_PIC_DATA', payload);
+        showToast("ANALYTICS SYNCED TO MASTER", false);
+        
+        // Clear the numerical inputs after successful save
+        const inputs = ['total','2x','3x','5x','new','move','cuti','off','s1','s2','s3','s4','s5'];
+        inputs.forEach(id => document.getElementById(`pic-${id}`).value = '');
+        
+        await loadPICTable(); // Instantly refresh the table below
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync Ledger to Master';
+      }
+    }
+
+    function togglePICSidebar() {
+      const sidebar = document.getElementById('pic-sidebar');
+      
+      // Mobile Action: Slide in and out of the screen natively
+      sidebar.classList.toggle('-translate-x-full');
+      
+      // Desktop Action: Slide off-screen using negative margin (prevents text squishing!)
+      sidebar.classList.toggle('md:-ml-64');
+    }
+
+    function switchPICTab(tabId) {
+      document.getElementById('pic-analytic-panel').classList.add('hidden');
+      document.getElementById('pic-inventory-panel').classList.add('hidden');
+      document.getElementById('pic-trainer-panel').classList.add('hidden');
+      
+      document.getElementById(`pic-${tabId}-panel`).classList.remove('hidden');
+
+      const inactiveClass = "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors hover:bg-slate-800 text-slate-400";
+      document.getElementById('pic-tab-analytic').className = inactiveClass;
+      document.getElementById('pic-tab-inventory').className = inactiveClass;
+      document.getElementById('pic-tab-trainer').className = inactiveClass;
+      
+      // Dynamic active color based on the tab
+      let activeColor = "emerald";
+      if (tabId === 'trainer') activeColor = "blue";
+
+      document.getElementById(`pic-tab-${tabId}`).className = `flex items-center gap-3 px-4 py-3 rounded-lg bg-${activeColor}-900/20 border border-${activeColor}-500/30 text-${activeColor}-400 text-sm transition-colors`;
+      
+      if(tabId === 'inventory') {
+        document.getElementById('inv-branch').innerHTML = document.getElementById('pic-branch').innerHTML;
+        document.getElementById('inv-month').value = document.getElementById('pic-month').value;
+        document.getElementById('inv-year').value = document.getElementById('pic-year').value;
+        loadInventoryTable();
+      } else if (tabId === 'trainer') {
+        loadPICTrainerDB(); // Fetch data when they click the tab
+      }
+
+      // NEW: Auto-hide sidebar on mobile after clicking
+      if (window.innerWidth < 768) {
+        document.getElementById('pic-sidebar').classList.add('-translate-x-full');
+      }
+    }
+
+    // --- DELETION LOGIC FOR ANALYTICS ---
+    async function executeDeletePIC(branch, month, year) {
+      if(!confirm(`WARNING: Purge Analytics for ${branch} (${month} ${year})?`)) return;
+      try {
+        await server.call('DELETE_PIC_DATA', { pic: currentPIC, branch, month, year });
+        showToast("ANALYTICS PURGED", false);
+        loadPICTable();
+      } catch(e) { showToast(e.message, true); }
+    }
+
+    // --- INVENTORY LOGIC ---
+    async function loadInventoryTable() {
+      const tbody = document.getElementById('inv-history-body');
+      tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-emerald-500"><i class="fa-solid fa-spinner animate-spin"></i> Retrieving...</td></tr>';
+      try {
+        const data = await server.call('GET_INVENTORY_DATA', currentPIC);
+        if (data.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-600 uppercase text-[10px] font-bold">No data found</td></tr>';
+        
+        tbody.innerHTML = data.reverse().map(row => {
+          const safeData = encodeURIComponent(JSON.stringify(row));
+          return `
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="p-4 font-bold text-slate-200">${row[2]} ${row[3]}</td>
+              <td class="p-4"><span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded text-[10px]">${row[1]}</span></td>
+              <td class="p-4 text-white">${row[4]||0} / ${row[5]||0}</td>
+              <td class="p-4 text-white">${row[6]||0} / ${row[7]||0}</td>
+              <td class="p-4 text-right">
+                <button onclick="editInventoryRow('${safeData}')" class="text-amber-500 hover:text-amber-400 uppercase font-bold text-[10px] mr-3"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="executeDeleteInventory('${row[1]}', '${row[2]}', '${row[3]}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px]"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500 text-[10px]">${err.message}</td></tr>`; }
+    }
+
+    function editInventoryRow(encodedData) {
+      const row = JSON.parse(decodeURIComponent(encodedData));
+      document.getElementById('inv-branch').value = row[1]; document.getElementById('inv-month').value = row[2]; document.getElementById('inv-year').value = row[3];
+      document.getElementById('inv-kertas').value = row[4]; document.getElementById('inv-printing').value = row[5];
+      document.getElementById('inv-marker-act').value = row[6]; document.getElementById('inv-marker-inact').value = row[7];
+      document.getElementById('inv-rem-tv').value = row[8]; document.getElementById('inv-rem-ac').value = row[9];
+      document.getElementById('inv-penghapus').value = row[10]; document.getElementById('inv-boardgames').value = row[11];
+      document.getElementById('inv-notes').value = row[12];
+      document.querySelector('#pic-dashboard-view .overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function executeSaveInventory() {
+      const btn = document.getElementById('save-inv-btn');
+      const payload = {
+        pic: currentPIC, branch: document.getElementById('inv-branch').value, month: document.getElementById('inv-month').value, year: document.getElementById('inv-year').value,
+        kertas: document.getElementById('inv-kertas').value || '', printing: document.getElementById('inv-printing').value || '',
+        markerActive: document.getElementById('inv-marker-act').value || '', markerInactive: document.getElementById('inv-marker-inact').value || '',
+        remoteTV: document.getElementById('inv-rem-tv').value || '', remoteAC: document.getElementById('inv-rem-ac').value || '',
+        penghapus: document.getElementById('inv-penghapus').value || '', boardGames: document.getElementById('inv-boardgames').value || '', notes: document.getElementById('inv-notes').value || ''
+      };
+
+      if (!payload.branch || !payload.month) return showToast("CONFIGURATION FIELDS REQUIRED", true);
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> SYNCING...';
+
+      try {
+        await server.call('SAVE_INVENTORY_DATA', payload);
+        showToast("INVENTORY SYNCED", false);
+        ['kertas','printing','marker-act','marker-inact','rem-tv','rem-ac','penghapus','boardgames','notes'].forEach(id => document.getElementById(`inv-${id}`).value = '');
+        loadInventoryTable();
+      } catch (e) { showToast(e.message, true); } 
+      finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync Inventory'; }
+    }
+
+    async function executeDeleteInventory(branch, month, year) {
+      if(!confirm(`WARNING: Purge Inventory for ${branch} (${month} ${year})?`)) return;
+      try {
+        await server.call('DELETE_INVENTORY_DATA', { pic: currentPIC, branch, month, year });
+        showToast("INVENTORY PURGED", false);
+        loadInventoryTable();
+      } catch(e) { showToast(e.message, true); }
+    }
+
+    async function loadPICTrainerDB() {
+      try {
+        const accounts = await server.call('GET_ACCOUNTS');
+        
+        // Arrays to hold the HTML for each layer
+        let adminHTML = "", mainHTML = "", subHTML = "";
+        let adminCount = 0, mainCount = 0, subCount = 0;
+
+        accounts.forEach(row => {
+          if (!row[0]) return; // Skip empty ghost rows
+
+          const name = row[0] || '-';
+          const code = row[2] || '-';
+          const branch = row[3] || '-';
+          const rawWa = row[4] ? row[4].toString() : '';
+          const level = row[6] || '-';
+          const pref = row[7] || '-';
+          const status = row[8] || '-';
+
+          // --- WA CRM LOGIC ---
+          let cleanWa = rawWa.replace(/\D/g, ''); 
+          if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.substring(1); 
+          let waMessage = encodeURIComponent(`Hallo ${name}, how's it going?`);
+          let waLink = cleanWa ? `https://wa.me/${cleanWa}?text=${waMessage}` : '#';
+
+          const waBtn = cleanWa 
+            ? `<a href="${waLink}" target="_blank" class="inline-flex items-center gap-2 bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition-all shadow-sm font-bold text-[10px] uppercase tracking-widest"><i class="fa-brands fa-whatsapp text-sm"></i> ${rawWa}</a>` 
+            : '<span class="text-slate-600">-</span>';
+
+          // Read-Only Table Row (No Edit/Delete)
+          const rowHTML = `
+            <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors text-[10px]">
+              <td class="p-4 text-slate-200 font-bold whitespace-nowrap">${name}</td>
+              <td class="p-4 font-mono text-slate-400 font-bold whitespace-nowrap">${code}</td>
+              <td class="p-4 whitespace-nowrap"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded uppercase">${branch}</span></td>
+              <td class="p-4 whitespace-nowrap">${waBtn}</td>
+              <td class="p-4 text-amber-400 font-bold whitespace-nowrap">${pref}</td>
+              <td class="p-4 text-slate-300 whitespace-nowrap">${level}</td>
+            </tr>`;
+
+          // Sort into the 3 Layers
+          if (status === 'Admin') { adminHTML += rowHTML; adminCount++; }
+          else if (status === 'Main Trainer') { mainHTML += rowHTML; mainCount++; }
+          else if (status === 'Substitute') { subHTML += rowHTML; subCount++; }
+        });
+
+        // Inject HTML and conditionally hide/show empty layers
+        document.getElementById('pic-admin-body').innerHTML = adminHTML;
+        document.getElementById('pic-admin-layer').classList.toggle('hidden', adminCount === 0);
+
+        document.getElementById('pic-main-body').innerHTML = mainHTML;
+        document.getElementById('pic-main-layer').classList.toggle('hidden', mainCount === 0);
+
+        document.getElementById('pic-sub-body').innerHTML = subHTML;
+        document.getElementById('pic-sub-layer').classList.toggle('hidden', subCount === 0);
+
+      } catch (err) {
+        showToast("FAILED TO LOAD TRAINER DATABASE", true);
+      }
+    }
+
+    // --- PIC TRAINER LIVE SEARCH ---
+    function filterPICTrainers() {
+      const input = document.getElementById('pic-trainer-search').value.toLowerCase();
+      // Grabs ALL rows from ALL 3 tables inside the Trainer panel
+      const rows = document.querySelectorAll('#pic-trainer-panel tbody tr');
+
+      rows.forEach(row => {
+        const nameCell = row.querySelector('td:nth-child(1)');
+        const codeCell = row.querySelector('td:nth-child(2)');
+        
+        if (nameCell && codeCell) {
+          const text = (nameCell.textContent + " " + codeCell.textContent).toLowerCase();
+          row.style.display = text.includes(input) ? '' : 'none';
+        }
+      });
+    }
+
+    // --- UNIFIED DISCONNECT PROTOCOL ---
+    function terminateSession() {
+      // 1. Hide all dashboard views
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('manager-dashboard-view').classList.add('hidden');
+      document.getElementById('pic-dashboard-view').classList.add('hidden');
+      
+      // 2. Wipe sensitive runtime memory
+      currentPIC = "";
+      currentDrillDownBranch = "";
+      accountToPurge = null;
+      
+      // 3. Clear Admin Login Form & FORCE RESET BUTTON
+      document.getElementById('admin-user').value = '';
+      document.getElementById('admin-pass').value = '';
+      
+      const adminBtn = document.getElementById('admin-login-btn');
+      if (adminBtn) {
+        adminBtn.innerHTML = 'Execute';
+        adminBtn.disabled = false;
+      }
+      
+      // 4. Force all sidebars closed (for mobile users)
+      document.getElementById('admin-sidebar').classList.add('-translate-x-full');
+      document.getElementById('manager-sidebar').classList.add('-translate-x-full');
+      document.getElementById('pic-sidebar').classList.add('-translate-x-full');
+      
+      // 5. Alert the user
+      showToast("SESSION TERMINATED. RETURNING TO GRID.", false);
+    }
+
+    async function openTrainerDossier(name, code, presenceCount) {
+      const modal = document.getElementById('dossier-modal');
+      const waBtn = document.getElementById('dos-wa-btn');
+      const classContainer = document.getElementById('dos-classes-container');
+      
+      // 1. Instantly show basic data
+      document.getElementById('dos-name').innerText = name;
+      document.getElementById('dos-code').innerText = code;
+      document.getElementById('dos-presence').innerText = `${presenceCount} Days`;
+      
+      // Show loading states
+      document.getElementById('dos-status').innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Retrieving Data...';
+      classContainer.innerHTML = '<div class="text-center p-4"><i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-2xl"></i></div>';
+      
+      // Smooth entrance animation
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => modal.classList.remove('opacity-0', 'scale-95'));
+
+      try {
+        // 2. Fetch full profile and classes (In a real app, you might cache this)
+        const [accounts, classes] = await Promise.all([
+          server.call('GET_ACCOUNTS'),
+          server.call('GET_ACTIVE_CLASSES').catch(() => [])
+        ]);
+
+        // 3. Find the specific trainer
+        const profile = accounts.find(row => row[2].toString().trim().toUpperCase() === code.toUpperCase());
+        
+        if (profile) {
+          const level = profile[6] || 'Unassigned Level';
+          const status = profile[8] || 'Unknown Status';
+          document.getElementById('dos-status').innerText = `${status} • ${level}`;
+          
+          // WA CRM Logic
+          let rawWa = profile[4] ? profile[4].toString() : '';
+          let cleanWa = rawWa.replace(/\D/g, ''); 
+          if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.substring(1); 
+          let waMessage = encodeURIComponent(`Hallo ${name}, quick check-in regarding your schedule today.`);
+          
+          if (cleanWa) {
+            waBtn.href = `https://wa.me/${cleanWa}?text=${waMessage}`;
+            waBtn.classList.remove('hidden');
+          } else {
+            waBtn.classList.add('hidden'); // Hide if no number
+          }
+        }
+
+        // 4. Build Active Class Roster
+        const trainerClasses = classes.filter(cls => cls[5] && cls[5].toString().trim().toUpperCase() === name.toUpperCase());
+        const load = trainerClasses.length;
+        
+        const capacityEl = document.getElementById('dos-capacity');
+        capacityEl.innerText = `${load}/5 Slots`;
+        capacityEl.className = load >= 5 ? "text-2xl font-black text-red-500" : "text-2xl font-black text-yellow-500";
+
+        if (load === 0) {
+          classContainer.innerHTML = '<p class="text-xs text-slate-500 uppercase tracking-widest italic text-center p-4 border border-dashed border-slate-700 rounded">No active classes assigned.</p>';
+        } else {
+          classContainer.innerHTML = trainerClasses.map(cls => `
+            <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700 flex justify-between items-center">
+              <div>
+                <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">${cls[1]} <span class="text-slate-500 ml-1">(${cls[3]})</span></p>
+                <p class="text-xs font-mono text-slate-200 mt-1">${cls[2]}</p>
+              </div>
+              <div class="text-right">
+                <span class="bg-slate-900 px-2 py-1 rounded text-[9px] uppercase font-bold text-slate-400">${cls[4]}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        classContainer.innerHTML = `<p class="text-xs text-red-500 uppercase tracking-widest text-center p-4">Error loading data: ${err.message}</p>`;
+      }
+    }
+
+    function closeDossier() {
+      const modal = document.getElementById('dossier-modal');
+      modal.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // --- GLOBAL ANALYTICS ENGINE ---
+    let globalPICData = [];
+    let globalInvData = [];
+    let activeChartInstance = null; let freqChartInstance = null; let scheduleChartInstance = null;
+    let consumablesChartInstance = null; let markerChartInstance = null;
+
+    async function loadGlobalAnalytics() {
+      try {
+        const date = new Date();
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById('global-month').value = months[date.getMonth()];
+        document.getElementById('global-year').value = date.getFullYear();
+
+        const [picData, invData, branches, classes] = await Promise.all([
+          server.call('GET_ALL_PIC_DATA'),
+          server.call('GET_ALL_INVENTORY_DATA').catch(() => []),
+          server.call('GET_BRANCH_LIST').catch(() => []),
+          server.call('GET_ACTIVE_CLASSES').catch(() => [])
+        ]);
+
+        globalPICData = picData || [];
+        globalInvData = invData || [];
+
+        // Populate Branch Dropdown
+        const branchSelect = document.getElementById('global-branch');
+        branchSelect.innerHTML = '<option value="ALL">ALL BRANCHES</option>' + branches.map(b => `<option value="${b[0].toUpperCase()}">${b[0].toUpperCase()}</option>`).join('');
+
+        document.getElementById('stat-total-branches').innerText = branches.length;
+        document.getElementById('stat-total-classes').innerText = classes.length;
+
+        renderGlobalAnalytics();
+      } catch (err) {
+        showToast("FAILED TO LOAD GLOBAL ANALYTICS", true);
+      }
+    }
+
+    function renderGlobalAnalytics() {
+      const selectedMonth = document.getElementById('global-month').value;
+      const selectedYear = document.getElementById('global-year').value;
+      const selectedBranch = document.getElementById('global-branch').value;
+
+      // Academic Variables
+      let currentActive = 0; let currentLost = 0;
+      let f2x = 0; let f3x = 0; let f5x = 0;
+      let s1 = 0; let s2 = 0; let s3 = 0; let s4 = 0; let s5 = 0;
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const activeTrends = new Array(12).fill(0); const lostTrends = new Array(12).fill(0);
+
+      // Inventory Variables
+      let invKertas = 0; let invPrint = 0; let invMarkAct = 0; let invMarkDead = 0;
+      let invTV = 0; let invAC = 0; let invEraser = 0; let invGames = 0;
+
+      // Process PIC Data
+      globalPICData.forEach(row => {
+        const branchMatch = selectedBranch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === selectedBranch);
+        if (row[3].toString() === selectedYear.toString() && branchMatch) {
+          const monthIndex = months.indexOf(row[2]);
+          if (monthIndex > -1) {
+            activeTrends[monthIndex] += parseInt(row[4]) || 0;
+            lostTrends[monthIndex] += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
+          }
+        }
+        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch) {
+          currentActive += parseInt(row[4]) || 0; currentLost += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
+          f2x += parseInt(row[5]) || 0; f3x += parseInt(row[6]) || 0; f5x += parseInt(row[7]) || 0;
+          s1 += parseInt(row[12]) || 0; s2 += parseInt(row[13]) || 0; s3 += parseInt(row[14]) || 0; s4 += parseInt(row[15]) || 0; s5 += parseInt(row[16]) || 0;
+        }
+      });
+
+      // Process Inventory Data
+      globalInvData.forEach(row => {
+        const branchMatch = selectedBranch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === selectedBranch);
+        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch) {
+          invKertas += parseInt(row[4]) || 0; invPrint += parseInt(row[5]) || 0;
+          invMarkAct += parseInt(row[6]) || 0; invMarkDead += parseInt(row[7]) || 0;
+          invTV += parseInt(row[8]) || 0; invAC += parseInt(row[9]) || 0;
+          invEraser += parseInt(row[10]) || 0; invGames += parseInt(row[11]) || 0;
+        }
+      });
+
+      // Update Academic DOM
+      document.getElementById('stat-total-active').innerText = currentActive;
+      document.getElementById('stat-total-lost').innerText = currentLost;
+
+      // Update Inventory DOM
+      document.getElementById('stat-inv-kertas').innerText = invKertas;
+      document.getElementById('stat-inv-print').innerText = invPrint;
+      document.getElementById('stat-inv-marker-act').innerText = invMarkAct;
+      document.getElementById('stat-inv-marker-dead').innerText = invMarkDead;
+      document.getElementById('stat-inv-tv').innerText = invTV;
+      document.getElementById('stat-inv-ac').innerText = invAC;
+      document.getElementById('stat-inv-eraser').innerText = invEraser;
+      document.getElementById('stat-inv-games').innerText = invGames;
+
+      drawCharts(months, activeTrends, lostTrends, [f2x, f3x, f5x], [s1, s2, s3, s4, s5], [invKertas, invPrint], [invMarkAct, invMarkDead]);
+    }
+
+    function drawCharts(labels, activeData, lostData, freqData, scheduleData, consumablesData, markersData) {
+      const darkOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font:{size:9} } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 8 } } } } };
+      const pieOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 9, family: 'monospace' }, boxWidth: 10 } } } };
+
+      if (activeChartInstance) activeChartInstance.destroy(); if (freqChartInstance) freqChartInstance.destroy();
+      if (scheduleChartInstance) scheduleChartInstance.destroy(); if (consumablesChartInstance) consumablesChartInstance.destroy();
+      if (markerChartInstance) markerChartInstance.destroy();
+
+      // 1. Active & Lost Trajectory (Combined into one chart to save space)
+      activeChartInstance = new Chart(document.getElementById('activeChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: labels, datasets: [
+          { label: 'Active', data: activeData, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 2 },
+          { label: 'Lost', data: lostData, borderColor: '#ef4444', backgroundColor: 'transparent', borderWidth: 2, borderDash: [5, 5], tension: 0.4, pointRadius: 2 }
+        ]},
+        options: darkOptions
+      });
+
+      // 2. Freq Donut
+      freqChartInstance = new Chart(document.getElementById('freqChart').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['2x', '3x', '5x'], datasets: [{ data: freqData, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'], borderWidth: 0 }] },
+        options: pieOptions
+      });
+
+      // 3. Schedule Polar Area
+      scheduleChartInstance = new Chart(document.getElementById('scheduleChart').getContext('2d'), {
+        type: 'polarArea',
+        data: { labels: ['S1', 'S2', 'S3', 'S4', 'S5'], datasets: [{ data: scheduleData, backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(16,185,129,0.6)', 'rgba(245,158,11,0.6)', 'rgba(168,85,247,0.6)', 'rgba(239,68,68,0.6)'], borderWidth: 1, borderColor: '#0f172a' }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { r: { ticks: { display: false } } }, plugins: { legend: { display: false } } }
+      });
+
+      // 4. Consumables Bar
+      consumablesChartInstance = new Chart(document.getElementById('consumablesChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: ['Buku/Kertas', 'Printing Paper'], datasets: [{ label: 'Usage', data: consumablesData, backgroundColor: ['#f59e0b', '#fcd34d'], borderRadius: 4 }] },
+        options: darkOptions
+      });
+
+      // 5. Markers Doughnut
+      markerChartInstance = new Chart(document.getElementById('markerChart').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['Active', 'Dead'], datasets: [{ data: markersData, backgroundColor: ['#06b6d4', '#ef4444'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+      });
+    }
+
+    // --- EXECUTIVE REPORT BUILDER ---
+    function buildPDFTemplate() {
+      const branch = document.getElementById('global-branch').value;
+      const month = document.getElementById('global-month').value;
+      const year = document.getElementById('global-year').value;
+
+      // 1. Recalculate the exact data for the report
+      let currentActive = 0, currentLost = 0;
+      let f2x = 0, f3x = 0, f5x = 0;
+      let s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
+      
+      globalPICData.forEach(row => {
+        const branchMatch = branch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === branch);
+        if (row[2] === month && row[3].toString() === year.toString() && branchMatch) {
+          currentActive += parseInt(row[4]) || 0;
+          currentLost += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
+          f2x += parseInt(row[5]) || 0; f3x += parseInt(row[6]) || 0; f5x += parseInt(row[7]) || 0;
+          s1 += parseInt(row[12]) || 0; s2 += parseInt(row[13]) || 0; s3 += parseInt(row[14]) || 0; s4 += parseInt(row[15]) || 0; s5 += parseInt(row[16]) || 0;
+        }
+      });
+
+      let invKertas = 0, invPrint = 0, invMarkAct = 0, invMarkDead = 0;
+      let invTV = 0, invAC = 0, invEraser = 0, invGames = 0;
+
+      globalInvData.forEach(row => {
+        const branchMatch = branch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === branch);
+        if (row[2] === month && row[3].toString() === year.toString() && branchMatch) {
+          invKertas += parseInt(row[4]) || 0; invPrint += parseInt(row[5]) || 0;
+          invMarkAct += parseInt(row[6]) || 0; invMarkDead += parseInt(row[7]) || 0;
+          invTV += parseInt(row[8]) || 0; invAC += parseInt(row[9]) || 0;
+          invEraser += parseInt(row[10]) || 0; invGames += parseInt(row[11]) || 0;
+        }
+      });
+
+      // 2. Construct the Corporate HTML Layout
+      return `
+        <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; width: 800px;">
+          
+          <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px;">
+            <h1 style="margin: 0; font-size: 28px; color: #0f172a; text-transform: uppercase; letter-spacing: 2px;">Kampung Inggris Pontianak</h1>
+            <h2 style="margin: 10px 0 0 0; font-size: 18px; color: #3b82f6; font-weight: normal;">Executive Analytics Report</h2>
+          </div>
+
+          <table style="width: 100%; margin-bottom: 40px; font-size: 14px;">
+            <tr>
+              <td><strong>Target Node:</strong> ${branch}</td>
+              <td style="text-align: center;"><strong>Cycle:</strong> ${month} ${year}</td>
+              <td style="text-align: right;"><strong>Generated:</strong> ${new Date().toLocaleDateString()}</td>
+            </tr>
+          </table>
+
+          <h3 style="background: #f1f5f9; padding: 10px 15px; border-left: 4px solid #3b82f6; margin-bottom: 15px; font-size: 16px;">1. Academic & Demographics</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+            <tr style="background: #e2e8f0; text-align: left;">
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">Metric</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">Value</th>
+            </tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Total Active Students</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${currentActive}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Total Attrition (Cuti & Off)</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center; color: #ef4444; font-weight: bold;">${currentLost}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Frequency: 2x per week</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${f2x}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Frequency: 3x per week</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${f3x}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Frequency: 5x per week</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${f5x}</td></tr>
+          </table>
+
+          <h3 style="background: #f1f5f9; padding: 10px 15px; border-left: 4px solid #8b5cf6; margin-bottom: 15px; font-size: 16px;">2. Time-Slot Distribution</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+            <tr style="background: #e2e8f0; text-align: center;">
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">08:30</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">10:15</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">14:00</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">16:00</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">18:45</th>
+            </tr>
+            <tr style="text-align: center;">
+              <td style="padding: 10px; border: 1px solid #cbd5e1;">${s1}</td>
+              <td style="padding: 10px; border: 1px solid #cbd5e1;">${s2}</td>
+              <td style="padding: 10px; border: 1px solid #cbd5e1;">${s3}</td>
+              <td style="padding: 10px; border: 1px solid #cbd5e1;">${s4}</td>
+              <td style="padding: 10px; border: 1px solid #cbd5e1;">${s5}</td>
+            </tr>
+          </table>
+
+          <h3 style="background: #f1f5f9; padding: 10px 15px; border-left: 4px solid #f59e0b; margin-bottom: 15px; font-size: 16px;">3. Logistics & Asset Audit</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+            <tr style="background: #e2e8f0; text-align: left;">
+              <th style="padding: 10px; border: 1px solid #cbd5e1;">Item Category</th>
+              <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">Active / Consumed</th>
+            </tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Paper Used (Kertas)</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invKertas}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Printing Paper</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invPrint}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Board Markers (Active / Dead)</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invMarkAct} / ${invMarkDead}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">TV Remotes</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invTV}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">AC Remotes</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invAC}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Erasers</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invEraser}</td></tr>
+            <tr><td style="padding: 10px; border: 1px solid #cbd5e1;">Board Games</td><td style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">${invGames}</td></tr>
+          </table>
+          
+          <div style="text-align: center; margin-top: 40px; font-size: 12px; color: #94a3b8;">
+            <p>End of Report. System Administrator: KIP Control Center.</p>
+          </div>
+
+        </div>
+      `;
+    }
+
+    // --- PDF EXPORT ENGINE ---
+    function exportDashboardToPDF() {
+      const btn = document.getElementById('export-pdf-btn');
+      
+      const branch = document.getElementById('global-branch').value;
+      const month = document.getElementById('global-month').value;
+      const year = document.getElementById('global-year').value;
+      const filename = `KIP_Executive_Report_${branch}_${month}_${year}.pdf`;
+
+      // Change button state
+      btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-lg"></i> Processing...';
+      btn.disabled = true;
+
+      // 1. Generate the HTML string from our new template
+      const reportHTML = buildPDFTemplate();
+      
+      // 2. Create a temporary, invisible container on the page
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = reportHTML;
+      
+      // 3. Configure html2pdf for a standard Portrait Document
+      const opt = {
+        margin:       0.4,
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 }, // High resolution text rendering
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      // 4. Generate and download
+      html2pdf().set(opt).from(tempDiv).save().then(() => {
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf text-lg"></i> Export';
+        btn.disabled = false;
+        showToast(`REPORT DOWNLOADED: ${filename}`, false);
+      }).catch(err => {
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf text-lg"></i> Export';
+        btn.disabled = false;
+        showToast("PDF GENERATION FAILED", true);
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>
