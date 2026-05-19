@@ -520,6 +520,11 @@
                 <option value="July">July</option><option value="August">August</option><option value="September">September</option>
                 <option value="October">October</option><option value="November">November</option><option value="December">December</option>
               </select>
+              <select id="global-period" onchange="renderGlobalAnalytics()" class="bg-slate-950 border border-slate-700 p-2 rounded text-xs text-yellow-100 outline-none focus:border-yellow-500 uppercase tracking-widest font-bold cursor-pointer max-w-[150px]">
+                <option value="ALL">ALL PERIODS</option>
+                <option value="P1">PERIOD 1</option>
+                <option value="P2">PERIOD 2</option>
+              </select>
               <input type="number" id="global-year" value="2026" onchange="renderGlobalAnalytics()" class="bg-slate-950 border border-slate-700 p-2 rounded text-xs text-purple-100 outline-none focus:border-purple-500 w-20 font-mono font-bold text-center">
             </div>
           </div>
@@ -762,7 +767,7 @@
           <div class="bg-slate-900/80 border border-emerald-500/30 p-8 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-sm">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-transparent"></div>
             <h2 class="text-emerald-400 font-black uppercase tracking-tighter mb-6 flex items-center gap-2"><i class="fa-solid fa-pen-nib"></i> Analytic Input Matrix</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div><select id="pic-branch" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500"></select></div>
               <div>
                 <select id="pic-month" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500">
@@ -770,6 +775,12 @@
                   <option value="April">April</option><option value="May">May</option><option value="June">June</option>
                   <option value="July">July</option><option value="August">August</option><option value="September">September</option>
                   <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                </select>
+              </div>
+              <div>
+                <select id="pic-period" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-yellow-100 outline-none focus:border-yellow-500 uppercase font-bold">
+                  <option value="P1">Period 1: 1-15</option>
+                  <option value="P2">Period 2: 16-End</option>
                 </select>
               </div>
               <div><input type="number" id="pic-year" value="2026" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500 font-mono"></div>
@@ -809,7 +820,7 @@
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-transparent"></div>
             <h2 class="text-emerald-400 font-black uppercase tracking-tighter mb-6 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Inventory Audit Matrix</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div><select id="inv-branch" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500"></select></div>
               <div>
                 <select id="inv-month" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500">
@@ -817,6 +828,12 @@
                   <option value="April">April</option><option value="May">May</option><option value="June">June</option>
                   <option value="July">July</option><option value="August">August</option><option value="September">September</option>
                   <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                </select>
+              </div>
+              <div>
+                <select id="inv-period" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-yellow-100 outline-none focus:border-yellow-500 uppercase font-bold">
+                  <option value="P1">Period 1: 1-15</option>
+                  <option value="P2">Period 2: 16-End</option>
                 </select>
               </div>
               <div><input type="number" id="inv-year" value="2026" class="w-full bg-slate-950 border border-slate-800 p-3 rounded text-sm text-white outline-none focus:border-emerald-500 font-mono"></div>
@@ -910,7 +927,7 @@
 
   <script>
     // --- REST API BRIDGE (FOR GITHUB / CUSTOM DOMAIN) ---
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxioWDc45zeAJT1pP26EyxCmrRAocxsnndarU4q21w8fo62dppIq9S0g2TjgfHatdmnHQ/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxtvymXdN69XUViT4Ngu6ipGWnntTp7j4WgqJ378gAGI_To-3_ZDpHrTQ0UqRYQsDLx-g/exec";
 
     const server = { 
       call: async (action, data = {}) => {
@@ -2150,6 +2167,27 @@
 
     let currentPIC = "";
 
+    function normalizePeriod(value) {
+      const period = (value || '').toString().trim().toUpperCase();
+      return period || 'LEGACY';
+    }
+
+    function formatPeriodLabel(value) {
+      const period = normalizePeriod(value);
+      if (period === 'P1') return 'Period 1: 1-15';
+      if (period === 'P2') return 'Period 2: 16-End';
+      return 'Legacy Data';
+    }
+
+    function getDefaultPeriod() {
+      return new Date().getDate() <= 15 ? 'P1' : 'P2';
+    }
+
+    function periodMatches(rowPeriod, selectedPeriod) {
+      const normalized = normalizePeriod(rowPeriod);
+      return selectedPeriod === 'ALL' || normalized === selectedPeriod;
+    }
+
     async function renderPICDashboard(picName) {
       currentPIC = picName;
       document.getElementById('pic-dashboard-view').classList.remove('hidden');
@@ -2167,6 +2205,7 @@
       const date = new Date();
       const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       document.getElementById('pic-month').value = months[date.getMonth()];
+      document.getElementById('pic-period').value = getDefaultPeriod();
       document.getElementById('pic-year').value = date.getFullYear();
 
       // Load Historical Table
@@ -2189,17 +2228,22 @@
         tbody.innerHTML = data.reverse().map(row => {
           // Serialize the row data so we can pass it to the edit function safely
           const safeData = encodeURIComponent(JSON.stringify(row));
+          const period = normalizePeriod(row[17]);
+          const periodLabel = formatPeriodLabel(period);
           
           return `
             <tr class="hover:bg-slate-800/50 transition-colors">
-              <td class="p-4 font-bold text-slate-200">${row[2]} ${row[3]}</td>
+              <td class="p-4 font-bold text-slate-200">
+                <div>${row[2]} ${row[3]}</div>
+                <div class="text-[9px] text-yellow-400 uppercase tracking-widest mt-1">${periodLabel}</div>
+              </td>
               <td class="p-4"><span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded text-[10px]">${row[1]}</span></td>
               <td class="p-4 font-black text-white">${row[4] || 0}</td>
               <td class="p-4 text-blue-400 font-bold">+${row[8] || 0}</td>
               <td class="p-4 text-slate-500">${row[9]||0} / ${row[10]||0} / ${row[11]||0}</td>
               <td class="p-4 text-right">
                 <button onclick="editPICRow('${safeData}')" class="text-amber-500 hover:text-amber-400 uppercase font-bold text-[10px] tracking-widest transition-colors"><i class="fa-solid fa-pen"></i> Edit</button>
-                <button onclick="executeDeletePIC('${row[1]}', '${row[2]}', '${row[3]}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px] tracking-widest transition-colors" title="Purge"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="executeDeletePIC('${row[1]}', '${row[2]}', '${row[3]}', '${period}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px] tracking-widest transition-colors" title="Purge"><i class="fa-solid fa-trash"></i></button>
               </td>
             </tr>
           `;
@@ -2215,6 +2259,7 @@
       // Populate the form with the selected historical data
       document.getElementById('pic-branch').value = row[1];
       document.getElementById('pic-month').value = row[2];
+      document.getElementById('pic-period').value = normalizePeriod(row[17]) === 'LEGACY' ? getDefaultPeriod() : normalizePeriod(row[17]);
       document.getElementById('pic-year').value = row[3];
       document.getElementById('pic-total').value = row[4];
       document.getElementById('pic-2x').value = row[5];
@@ -2243,11 +2288,12 @@
         branch: document.getElementById('pic-branch').value,
         month: document.getElementById('pic-month').value,
         year: document.getElementById('pic-year').value,
+        period: document.getElementById('pic-period').value,
         totalActive: document.getElementById('pic-total').value || '',
-        f2x: document.getElementById('pic-2x').value || '',
-        f3x: document.getElementById('pic-3x').value || '',
-        f5x: document.getElementById('pic-5x').value || '',
-        newStudent: document.getElementById('pic-new').value || '',
+        freq2x: document.getElementById('pic-2x').value || '',
+        freq3x: document.getElementById('pic-3x').value || '',
+        freq5x: document.getElementById('pic-5x').value || '',
+        newStudents: document.getElementById('pic-new').value || '',
         move: document.getElementById('pic-move').value || '',
         cuti: document.getElementById('pic-cuti').value || '',
         off: document.getElementById('pic-off').value || '',
@@ -2313,6 +2359,7 @@
       if(tabId === 'inventory') {
         document.getElementById('inv-branch').innerHTML = document.getElementById('pic-branch').innerHTML;
         document.getElementById('inv-month').value = document.getElementById('pic-month').value;
+        document.getElementById('inv-period').value = document.getElementById('pic-period').value;
         document.getElementById('inv-year').value = document.getElementById('pic-year').value;
         loadInventoryTable();
       } else if (tabId === 'trainer') {
@@ -2326,10 +2373,11 @@
     }
 
     // --- DELETION LOGIC FOR ANALYTICS ---
-    async function executeDeletePIC(branch, month, year) {
-      if(!confirm(`WARNING: Purge Analytics for ${branch} (${month} ${year})?`)) return;
+    async function executeDeletePIC(branch, month, year, period) {
+      const periodLabel = formatPeriodLabel(period);
+      if(!confirm(`WARNING: Purge Analytics for ${branch} (${month} ${year} | ${periodLabel})?`)) return;
       try {
-        await server.call('DELETE_PIC_DATA', { pic: currentPIC, branch, month, year });
+        await server.call('DELETE_PIC_DATA', { pic: currentPIC, branch, month, year, period });
         showToast("ANALYTICS PURGED", false);
         loadPICTable();
       } catch(e) { showToast(e.message, true); }
@@ -2345,15 +2393,20 @@
         
         tbody.innerHTML = data.reverse().map(row => {
           const safeData = encodeURIComponent(JSON.stringify(row));
+          const period = normalizePeriod(row[13]);
+          const periodLabel = formatPeriodLabel(period);
           return `
             <tr class="hover:bg-slate-800/50 transition-colors">
-              <td class="p-4 font-bold text-slate-200">${row[2]} ${row[3]}</td>
+              <td class="p-4 font-bold text-slate-200">
+                <div>${row[2]} ${row[3]}</div>
+                <div class="text-[9px] text-yellow-400 uppercase tracking-widest mt-1">${periodLabel}</div>
+              </td>
               <td class="p-4"><span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded text-[10px]">${row[1]}</span></td>
               <td class="p-4 text-white">${row[4]||0} / ${row[5]||0}</td>
               <td class="p-4 text-white">${row[6]||0} / ${row[7]||0}</td>
               <td class="p-4 text-right">
                 <button onclick="editInventoryRow('${safeData}')" class="text-amber-500 hover:text-amber-400 uppercase font-bold text-[10px] mr-3"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="executeDeleteInventory('${row[1]}', '${row[2]}', '${row[3]}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="executeDeleteInventory('${row[1]}', '${row[2]}', '${row[3]}', '${period}')" class="text-red-500 hover:text-red-400 uppercase font-bold text-[10px]"><i class="fa-solid fa-trash"></i></button>
               </td>
             </tr>`;
         }).join('');
@@ -2362,7 +2415,7 @@
 
     function editInventoryRow(encodedData) {
       const row = JSON.parse(decodeURIComponent(encodedData));
-      document.getElementById('inv-branch').value = row[1]; document.getElementById('inv-month').value = row[2]; document.getElementById('inv-year').value = row[3];
+      document.getElementById('inv-branch').value = row[1]; document.getElementById('inv-month').value = row[2]; document.getElementById('inv-period').value = normalizePeriod(row[13]) === 'LEGACY' ? getDefaultPeriod() : normalizePeriod(row[13]); document.getElementById('inv-year').value = row[3];
       document.getElementById('inv-kertas').value = row[4]; document.getElementById('inv-printing').value = row[5];
       document.getElementById('inv-marker-act').value = row[6]; document.getElementById('inv-marker-inact').value = row[7];
       document.getElementById('inv-rem-tv').value = row[8]; document.getElementById('inv-rem-ac').value = row[9];
@@ -2374,7 +2427,7 @@
     async function executeSaveInventory() {
       const btn = document.getElementById('save-inv-btn');
       const payload = {
-        pic: currentPIC, branch: document.getElementById('inv-branch').value, month: document.getElementById('inv-month').value, year: document.getElementById('inv-year').value,
+        pic: currentPIC, branch: document.getElementById('inv-branch').value, month: document.getElementById('inv-month').value, year: document.getElementById('inv-year').value, period: document.getElementById('inv-period').value,
         kertas: document.getElementById('inv-kertas').value || '', printing: document.getElementById('inv-printing').value || '',
         markerActive: document.getElementById('inv-marker-act').value || '', markerInactive: document.getElementById('inv-marker-inact').value || '',
         remoteTV: document.getElementById('inv-rem-tv').value || '', remoteAC: document.getElementById('inv-rem-ac').value || '',
@@ -2393,10 +2446,11 @@
       finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync Inventory'; }
     }
 
-    async function executeDeleteInventory(branch, month, year) {
-      if(!confirm(`WARNING: Purge Inventory for ${branch} (${month} ${year})?`)) return;
+    async function executeDeleteInventory(branch, month, year, period) {
+      const periodLabel = formatPeriodLabel(period);
+      if(!confirm(`WARNING: Purge Inventory for ${branch} (${month} ${year} | ${periodLabel})?`)) return;
       try {
-        await server.call('DELETE_INVENTORY_DATA', { pic: currentPIC, branch, month, year });
+        await server.call('DELETE_INVENTORY_DATA', { pic: currentPIC, branch, month, year, period });
         showToast("INVENTORY PURGED", false);
         loadInventoryTable();
       } catch(e) { showToast(e.message, true); }
@@ -2632,6 +2686,7 @@
       const selectedMonth = document.getElementById('global-month').value;
       const selectedYear = document.getElementById('global-year').value;
       const selectedBranch = document.getElementById('global-branch').value;
+      const selectedPeriod = document.getElementById('global-period') ? document.getElementById('global-period').value : 'ALL';
 
       // Academic Variables
       let currentActive = 0; let currentLost = 0;
@@ -2647,14 +2702,15 @@
       // Process PIC Data
       globalPICData.forEach(row => {
         const branchMatch = selectedBranch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === selectedBranch);
-        if (row[3].toString() === selectedYear.toString() && branchMatch) {
+        const periodMatch = periodMatches(row[17], selectedPeriod);
+        if (row[3].toString() === selectedYear.toString() && branchMatch && periodMatch) {
           const monthIndex = months.indexOf(row[2]);
           if (monthIndex > -1) {
             activeTrends[monthIndex] += parseInt(row[4]) || 0;
             lostTrends[monthIndex] += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
           }
         }
-        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch) {
+        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch && periodMatch) {
           currentActive += parseInt(row[4]) || 0; currentLost += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
           f2x += parseInt(row[5]) || 0; f3x += parseInt(row[6]) || 0; f5x += parseInt(row[7]) || 0;
           s1 += parseInt(row[12]) || 0; s2 += parseInt(row[13]) || 0; s3 += parseInt(row[14]) || 0; s4 += parseInt(row[15]) || 0; s5 += parseInt(row[16]) || 0;
@@ -2664,7 +2720,8 @@
       // Process Inventory Data
       globalInvData.forEach(row => {
         const branchMatch = selectedBranch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === selectedBranch);
-        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch) {
+        const periodMatch = periodMatches(row[13], selectedPeriod);
+        if (row[2] === selectedMonth && row[3].toString() === selectedYear.toString() && branchMatch && periodMatch) {
           invKertas += parseInt(row[4]) || 0; invPrint += parseInt(row[5]) || 0;
           invMarkAct += parseInt(row[6]) || 0; invMarkDead += parseInt(row[7]) || 0;
           invTV += parseInt(row[8]) || 0; invAC += parseInt(row[9]) || 0;
@@ -2741,6 +2798,7 @@
       const branch = document.getElementById('global-branch').value;
       const month = document.getElementById('global-month').value;
       const year = document.getElementById('global-year').value;
+      const period = document.getElementById('global-period') ? document.getElementById('global-period').value : 'ALL';
 
       // 1. Recalculate the exact data for the report
       let currentActive = 0, currentLost = 0;
@@ -2749,7 +2807,8 @@
       
       globalPICData.forEach(row => {
         const branchMatch = branch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === branch);
-        if (row[2] === month && row[3].toString() === year.toString() && branchMatch) {
+        const periodMatch = periodMatches(row[17], period);
+        if (row[2] === month && row[3].toString() === year.toString() && branchMatch && periodMatch) {
           currentActive += parseInt(row[4]) || 0;
           currentLost += (parseInt(row[10]) || 0) + (parseInt(row[11]) || 0);
           f2x += parseInt(row[5]) || 0; f3x += parseInt(row[6]) || 0; f5x += parseInt(row[7]) || 0;
@@ -2762,7 +2821,8 @@
 
       globalInvData.forEach(row => {
         const branchMatch = branch === 'ALL' || (row[1] && row[1].toString().toUpperCase() === branch);
-        if (row[2] === month && row[3].toString() === year.toString() && branchMatch) {
+        const periodMatch = periodMatches(row[13], period);
+        if (row[2] === month && row[3].toString() === year.toString() && branchMatch && periodMatch) {
           invKertas += parseInt(row[4]) || 0; invPrint += parseInt(row[5]) || 0;
           invMarkAct += parseInt(row[6]) || 0; invMarkDead += parseInt(row[7]) || 0;
           invTV += parseInt(row[8]) || 0; invAC += parseInt(row[9]) || 0;
@@ -2782,7 +2842,7 @@
           <table style="width: 100%; margin-bottom: 40px; font-size: 14px;">
             <tr>
               <td><strong>Target Node:</strong> ${branch}</td>
-              <td style="text-align: center;"><strong>Cycle:</strong> ${month} ${year}</td>
+              <td style="text-align: center;"><strong>Cycle:</strong> ${month} ${year} | ${period === 'ALL' ? 'All Periods' : formatPeriodLabel(period)}</td>
               <td style="text-align: right;"><strong>Generated:</strong> ${new Date().toLocaleDateString()}</td>
             </tr>
           </table>
@@ -2848,6 +2908,7 @@
       const branch = document.getElementById('global-branch').value;
       const month = document.getElementById('global-month').value;
       const year = document.getElementById('global-year').value;
+      const period = document.getElementById('global-period') ? document.getElementById('global-period').value : 'ALL';
       const filename = `KIP_Executive_Report_${branch}_${month}_${year}.pdf`;
 
       // Change button state
